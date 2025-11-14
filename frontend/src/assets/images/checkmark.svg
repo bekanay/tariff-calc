@@ -1,0 +1,22 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3d88f1" stop-opacity="1" />
+      <stop offset="100%" stop-color="#3d88f1" stop-opacity="1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Circle background -->
+  <circle cx="100" cy="100" r="100" fill="url(#gradient)" filter="url(#shadow)"/>
+  
+  <!-- Checkmark -->
+  <path d="M 65 100 L 85 120 L 135 70" 
+        stroke="#ffffff" 
+        stroke-width="12" 
+        stroke-linecap="round" 
+        stroke-linejoin="round" 
+        fill="none"/>
+</svg>

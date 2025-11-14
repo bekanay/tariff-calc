@@ -1,0 +1,51 @@
+.layout {
+  display: flex;
+  flex-flow: column nowrap;
+  height: 100%;
+  margin: 0 auto;
+}
+
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 10px;
+  align-items: center;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+
+  .logo {
+    display: flex;
+    align-items: center;
+    width: 250px;
+    font-weight: 600;
+    font-size: 22px;
+  }
+
+  .menu {
+    display: flex;
+    gap: 40px;
+
+    .item {
+      .link {
+        font-size: 18px;
+        color: inherit;
+      }
+
+      &:hover {
+        color: #3d88f1;
+      }
+    }
+  }
+}
+
+.content {
+  height: 100%;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.footer {
+  text-align: center;
+  font-weight: 500;
+}
