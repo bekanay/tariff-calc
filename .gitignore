@@ -1,0 +1,4 @@
+.env
+calculator-backend.tar
+calculator-frontend.tar
+postgres13.tar

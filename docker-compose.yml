@@ -1,0 +1,64 @@
+services:
+  backend:
+    image: calculator-backend
+    build: ./tariff-api
+    container_name: tariff-api
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    environment:
+      KEYCLOAK_URL: ${KEYCLOAK_URL}
+      CLIENT_ID: ${CLIENT_ID}
+      CLIENT_SECRET: ${CLIENT_SECRET}
+      REALM: ${REALM}
+      REDIRECT_URI: ${REDIRECT_URI}
+      PORT: ${BACKEND_PORT}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: tariff_db
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_DSN: postgres://user:password@db:5432/tariff_db?sslmode=disable
+    working_dir: /app
+    volumes:
+      - ./.env:/app/.env:ro
+    command: [ "app" ]
+    depends_on:
+      - db
+    networks:
+      - backend_network
+
+  frontend:
+    image: calculator-frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_URL: http://10.100.44.26:${BACKEND_PORT}
+    container_name: tariff-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT}:80"
+    depends_on:
+      - backend
+    networks:
+      - backend_network
+
+  db:
+    image: postgres:13
+    container_name: tariff-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: tariff_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./db/init-scripts:/docker-entrypoint-initdb.d:ro
+      - ./data:/tmp/data:ro
+    networks:
+      - backend_network
+
+networks:
+  backend_network:
+    driver: bridge
