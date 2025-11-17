@@ -16,7 +16,7 @@ func NewAuthService(repo *repository.AuthRepository, requiredRole string) *AuthS
 	return &AuthService{repo: repo, requiredRole: requiredRole}
 }
 
-var ErrMissingRole = errors.New("requitred role missing")
+var ErrMissingRole = errors.New("required role missing")
 
 func (s *AuthService) Login(username, password string) (*model.TokenResponse, error) {
 	tokenResponse, err := s.repo.Login(username, password)
