@@ -38,3 +38,11 @@ func (s *AuthService) Logout(refreshToken string) error {
 	}
 	return nil
 }
+
+func (s *AuthService) HasRole(accessToken, role string) (bool, error) {
+	hasRole, err := s.repo.HasRole(accessToken, role)
+	if err != nil {
+		return false, errors.Wrap(err, "service failed to check role")
+	}
+	return hasRole, nil
+}

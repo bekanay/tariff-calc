@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 	"tariff-api/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -71,4 +72,29 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
+}
+
+func (h *AuthHandler) CheckRole(c *gin.Context) {
+	role := strings.TrimSpace(c.Param("role"))
+	if role == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "role is required"})
+		return
+	}
+
+	accessToken := strings.TrimSpace(c.GetHeader("Authorization"))
+	if accessToken == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
+		return
+	}
+
+	hasRole, err := h.service.HasRole(accessToken, role)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"role":     role,
+		"has_role": hasRole,
+	})
 }

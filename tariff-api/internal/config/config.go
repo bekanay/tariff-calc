@@ -14,6 +14,7 @@ type Config struct {
 		ClientSecret string
 		Realm        string
 		RedirectURI  string
+		RequiredRole string
 	}
 	Dsn string
 }
@@ -31,6 +32,7 @@ func LoadConfig() *Config {
 	cfg.KeyCloak.ClientSecret = os.Getenv("CLIENT_SECRET")
 	cfg.KeyCloak.Realm = os.Getenv("REALM")
 	cfg.KeyCloak.RedirectURI = os.Getenv("REDIRECT_URI")
+	cfg.KeyCloak.RequiredRole = os.Getenv("REQUIRED_ROLE")
 
 	cfg.Dsn = os.Getenv("DB_DSN")
 

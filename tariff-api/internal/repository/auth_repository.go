@@ -57,3 +57,12 @@ func (repo *AuthRepository) Logout(refreshToken string) error {
 	}
 	return nil
 }
+
+func (repo *AuthRepository) HasRole(accessToken, role string) (bool, error) {
+	claims := &model.KeycloakAccessTokenClaims{}
+	_, err := repo.client.DecodeAccessTokenCustomClaims(context.Background(), accessToken, repo.cfg.KeyCloak.Realm, claims)
+	if err != nil {
+		return false, errors.Wrap(err, "failed to decode access token")
+	}
+	return claims.HasRole(role), nil
+}

@@ -41,8 +41,9 @@ func main() {
 	r.POST("/login", authHandler.Login)
 	r.POST("/refresh-token", authHandler.RefreshToken)
 	r.POST("/logout", authHandler.Logout)
+	r.GET("/roles/:role", authHandler.CheckRole)
 
-	r.GET("/stations", stationHandler.GetStations)
+	r.GET("/stations", mw.RequireRole(authService, cfg.KeyCloak.RequiredRole), stationHandler.GetStations)
 
 	r.Run(":8081")
 }

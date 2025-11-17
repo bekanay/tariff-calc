@@ -12,6 +12,7 @@ services:
       CLIENT_SECRET: ${CLIENT_SECRET}
       REALM: ${REALM}
       REDIRECT_URI: ${REDIRECT_URI}
+      REQUIRED_ROLE: ${REQUIRED_ROLE}
       PORT: ${BACKEND_PORT}
       DB_HOST: db
       DB_PORT: 5432
@@ -33,7 +34,8 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_URL: http://10.100.44.26:${BACKEND_PORT}
+        # VITE_URL: http://10.100.44.26:${BACKEND_PORT}
+        VITE_URL: http://localhost:${BACKEND_PORT}
     container_name: tariff-frontend
     restart: unless-stopped
     ports:
