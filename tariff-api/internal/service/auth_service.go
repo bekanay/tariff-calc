@@ -8,18 +8,32 @@ import (
 )
 
 type AuthService struct {
-	repo *repository.AuthRepository
+	repo         *repository.AuthRepository
+	requiredRole string
 }
 
-func NewAuthService(repo *repository.AuthRepository) *AuthService {
-	return &AuthService{repo: repo}
+func NewAuthService(repo *repository.AuthRepository, requiredRole string) *AuthService {
+	return &AuthService{repo: repo, requiredRole: requiredRole}
 }
+
+var ErrMissingRole = errors.New("requitred role missing")
 
 func (s *AuthService) Login(username, password string) (*model.TokenResponse, error) {
 	tokenResponse, err := s.repo.Login(username, password)
 	if err != nil {
 		return nil, errors.Wrap(err, "service failed to login")
 	}
+
+	if s.requiredRole != "" {
+		hasRole, err := s.HasRole(tokenResponse.AccessToken, s.requiredRole)
+		if err != nil {
+			return nil, errors.Wrap(err, "service failed to verify role")
+		}
+		if !hasRole {
+			return nil, ErrMissingRole
+		}
+	}
+
 	return tokenResponse, nil
 }
 

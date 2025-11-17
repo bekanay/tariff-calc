@@ -28,7 +28,7 @@ func main() {
 	log.Println("DB connected ✅")
 
 	authRepo := repository.NewAuthRepository(cfg)
-	authService := service.NewAuthService(authRepo)
+	authService := service.NewAuthService(authRepo, cfg.KeyCloak.RequiredRole)
 	authHandler := handler.NewAuthHandler(authService)
 
 	stationRepo := repository.NewStationRepository(db)
