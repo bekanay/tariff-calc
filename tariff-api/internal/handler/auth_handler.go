@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 	"tariff-api/internal/service"
@@ -29,7 +30,23 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	tokenResponse, err := h.service.Login(loginRequest.Username, loginRequest.Password)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		switch {
+		case errors.Is(err, service.ErrInvalidCredentials):
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error":   "invalid_credentials",
+				"message": "Неправильный логин или пароль",
+			})
+		case errors.Is(err, service.ErrMissingRole):
+			c.JSON(http.StatusForbidden, gin.H{
+				"error":   "role_missing",
+				"message": "Недостаточно прав для входа",
+			})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error":   "login_failed",
+				"message": "Внутренняя ошибка сервера",
+			})
+		}
 		return
 	}
 

@@ -25,7 +25,8 @@ services:
       - ./.env:/app/.env:ro
     command: [ "app" ]
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - backend_network
 
@@ -34,8 +35,8 @@ services:
     build:
       context: ./frontend
       args:
-        # VITE_URL: http://10.100.44.26:${BACKEND_PORT}
-        VITE_URL: http://localhost:${BACKEND_PORT}
+        VITE_URL: http://10.100.44.26:${BACKEND_PORT}
+        # VITE_URL: http://localhost:${BACKEND_PORT}
     container_name: tariff-frontend
     restart: unless-stopped
     ports:
@@ -60,6 +61,12 @@ services:
       - ./data:/tmp/data:ro
     networks:
       - backend_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U user -d tariff_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
 networks:
   backend_network:

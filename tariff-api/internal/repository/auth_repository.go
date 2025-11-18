@@ -2,12 +2,16 @@ package repository
 
 import (
 	"context"
+	"errors"
+	"strings"
 	"tariff-api/internal/config"
 	"tariff-api/internal/model"
 
 	"github.com/Nerzal/gocloak/v11"
-	"github.com/pkg/errors"
+	pkgerrors "github.com/pkg/errors"
 )
+
+var ErrInvalidCredentials = errors.New("invalid credentials")
 
 type AuthRepository struct {
 	client gocloak.GoCloak
@@ -25,7 +29,11 @@ func NewAuthRepository(cfg *config.Config) *AuthRepository {
 func (repo *AuthRepository) Login(username, password string) (*model.TokenResponse, error) {
 	token, err := repo.client.Login(context.Background(), repo.cfg.KeyCloak.ClientID, repo.cfg.KeyCloak.ClientSecret, repo.cfg.KeyCloak.Realm, username, password)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to login")
+		var apiErr *gocloak.APIError
+		if errors.As(err, &apiErr) && isInvalidGrant(apiErr) {
+			return nil, pkgerrors.Wrap(ErrInvalidCredentials, "failed to login")
+		}
+		return nil, pkgerrors.Wrap(err, "failed to login")
 	}
 	return &model.TokenResponse{
 		AccessToken:  token.AccessToken,
@@ -39,7 +47,7 @@ func (repo *AuthRepository) Login(username, password string) (*model.TokenRespon
 func (repo *AuthRepository) RefreshToken(refreshToken string) (*model.TokenResponse, error) {
 	token, err := repo.client.RefreshToken(context.Background(), refreshToken, repo.cfg.KeyCloak.ClientID, repo.cfg.KeyCloak.ClientSecret, repo.cfg.KeyCloak.Realm)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to refresh token")
+		return nil, pkgerrors.Wrap(err, "failed to refresh token")
 	}
 	return &model.TokenResponse{
 		AccessToken:  token.AccessToken,
@@ -53,7 +61,7 @@ func (repo *AuthRepository) RefreshToken(refreshToken string) (*model.TokenRespo
 func (repo *AuthRepository) Logout(refreshToken string) error {
 	err := repo.client.Logout(context.Background(), repo.cfg.KeyCloak.ClientID, repo.cfg.KeyCloak.ClientSecret, repo.cfg.KeyCloak.Realm, refreshToken)
 	if err != nil {
-		return errors.Wrap(err, "failed to logout")
+		return pkgerrors.Wrap(err, "failed to logout")
 	}
 	return nil
 }
@@ -62,7 +70,17 @@ func (repo *AuthRepository) HasRole(accessToken, role string) (bool, error) {
 	claims := &model.KeycloakAccessTokenClaims{}
 	_, err := repo.client.DecodeAccessTokenCustomClaims(context.Background(), accessToken, repo.cfg.KeyCloak.Realm, claims)
 	if err != nil {
-		return false, errors.Wrap(err, "failed to decode access token")
+		return false, pkgerrors.Wrap(err, "failed to decode access token")
 	}
 	return claims.HasRole(role), nil
+}
+
+func isInvalidGrant(err *gocloak.APIError) bool {
+	if err == nil {
+		return false
+	}
+	if err.Type == gocloak.APIErrTypeInvalidGrant {
+		return true
+	}
+	return strings.Contains(strings.ToLower(err.Message), "invalid_grant")
 }

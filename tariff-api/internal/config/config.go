@@ -1,7 +1,6 @@
 package config
 
 import (
-	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -16,13 +15,14 @@ type Config struct {
 		RedirectURI  string
 		RequiredRole string
 	}
-	Dsn string
+	Dsn      string
+	LogLevel string
+	GinMode  string
 }
 
-func LoadConfig() *Config {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+func LoadConfig() (*Config, error) {
+	if err := godotenv.Load(); err != nil {
+		return nil, err
 	}
 
 	cfg := &Config{}
@@ -35,6 +35,8 @@ func LoadConfig() *Config {
 	cfg.KeyCloak.RequiredRole = os.Getenv("REQUIRED_ROLE")
 
 	cfg.Dsn = os.Getenv("DB_DSN")
+	cfg.LogLevel = os.Getenv("LOG_LEVEL")
+	cfg.GinMode = os.Getenv("GIN_MODE")
 
-	return cfg
+	return cfg, nil
 }
