@@ -29,11 +29,11 @@ CREATE TABLE IF NOT EXISTS uch (
 -- ДОП 2: Станции (справочник)
 -- =========================
 CREATE TABLE IF NOT EXISTS stan (
-  id         integer      PRIMARY KEY,      -- Идентификатор
-  stan_kod   integer      NOT NULL,         -- Код станции
-  stan_name  varchar(50)  NOT NULL,         -- Наименование
-  stan_priznak integer NOT NULL,
-  paragraph  varchar(50),         -- Параграф
+  id           serial       PRIMARY KEY,      -- Идентификатор
+  stan_kod     varchar(50)  NOT NULL,         -- Код станции
+  stan_name    varchar(50)  NOT NULL,         -- Наименование
+  stan_priznak integer      NOT NULL,
+  paragraph    varchar(50),                   -- Параграф
   CONSTRAINT stan_kod_uk UNIQUE (stan_kod)
 );
 
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS stan (
 -- ============================================
 CREATE TABLE IF NOT EXISTS tr_punkt (
   id         integer     PRIMARY KEY,       -- Идентификатор
-  tr         integer,                        -- Код транзитного пункта
+  tr         varchar(50),                        -- Код транзитного пункта
   updated_at timestamp,                      -- Время обновления
   tip_corr   varchar(50),                    -- Тип коррекции
   date_start date,                             -- Дата начала действия
@@ -73,9 +73,9 @@ CREATE TABLE IF NOT EXISTS kom_oper (
 CREATE TABLE IF NOT EXISTS uch_uzel (
   id         integer     PRIMARY KEY,        -- Идентификатор
   uch        integer,                        -- Номер участка -> uch.uch_num
-  stan1      integer,                        -- Код 1-й узловой станции -> stan.stan_kod
-  stan2      integer,                        -- Код 2-й узловой станции -> stan.stan_kod
-  stan3      integer,                        -- Код 3-й узловой станции -> stan.stan_kod
+  stan1      varchar(50),                        -- Код 1-й узловой станции -> stan.stan_kod
+  stan2      varchar(50),                        -- Код 2-й узловой станции -> stan.stan_kod
+  stan3      varchar(50),                        -- Код 3-й узловой станции -> stan.stan_kod
   updated_at timestamp,                      -- Время обновления
   tip_corr   varchar(50),                    -- Тип коррекции
   date_start date,                           -- Дата начала действия
@@ -91,12 +91,12 @@ CREATE TABLE IF NOT EXISTS uch_uzel (
 CREATE TABLE IF NOT EXISTS tarif_stan (
   id         integer      PRIMARY KEY,        -- Идентификатор
   uch        integer,                         -- Номер участка -> uch.uch_num
-  stan       integer,                         -- Код станции -> stan.stan_kod
-  stan1      integer,                         -- Код 1-го узла -> stan.stan_kod
+  stan       varchar(50),                         -- Код станции -> stan.stan_kod
+  stan1      varchar(50),                         -- Код 1-го узла -> stan.stan_kod
   dist1      numeric(10,3),                   -- Расстояние до 1-го узла (км)
-  stan2      integer,
+  stan2      varchar(50),
   dist2      numeric(10,3),
-  stan3      integer,
+  stan3      varchar(50),
   dist3      numeric(10,3),
   updated_at timestamp,                       -- Время обновления
   tip_corr   varchar(50),                     -- Тип коррекции
@@ -115,14 +115,14 @@ CREATE INDEX tarif_stan_stan_idx ON tarif_stan(stan);
 -- ======================================================================================
 CREATE TABLE IF NOT EXISTS stan_zd (
   id         integer      PRIMARY KEY,        -- Идентификатор
-  stan       integer,                         -- Код станции -> stan.stan_kod
-  tr1        integer,                          -- Код 1-го транзитного пункта -> tr_punkt.tr
+  stan       varchar(50),                         -- Код станции -> stan.stan_kod
+  tr1        varchar(50),                          -- Код 1-го транзитного пункта -> tr_punkt.tr
   dist1      numeric(10,3),                    -- Расстояние до 1-го ТП (км)
-  tr2        integer,
+  tr2        varchar(50),
   dist2      numeric(10,3),
-  tr3        integer,
+  tr3        varchar(50),
   dist3      numeric(10,3),
-  tr4        integer,
+  tr4        varchar(50),
   dist4      numeric(10,3),
   tip_corr   varchar(50),                      -- Тип коррекции
   date_start date,                             -- Дата начала действия
@@ -140,8 +140,8 @@ CREATE INDEX stan_zd_stan_idx ON stan_zd(stan);
 -- ===========================================================
 CREATE TABLE IF NOT EXISTS tarif_tr (
   id         integer      PRIMARY KEY,        -- Идентификатор
-  tr_start   integer,                         -- Код начального ТП -> tr_punkt.tr
-  tr_end     integer,                         -- Код конечного ТП  -> tr_punkt.tr
+  tr_start   varchar(50),                         -- Код начального ТП -> tr_punkt.tr
+  tr_end     varchar(50),                         -- Код конечного ТП  -> tr_punkt.tr
   dist_tr    numeric(10,3),                   -- Расстояние (км)
   updated_at timestamp,                       -- Время обновления
   tip_corr   varchar(50),                     -- Тип коррекции

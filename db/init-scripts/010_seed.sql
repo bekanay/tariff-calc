@@ -18,3 +18,9 @@ SET datestyle TO 'ISO, DMY';
 
 \copy tarif_tr (id, tr_start, tr_end, dist_tr, updated_at, tip_corr, date_start) FROM '/tmp/data/stations17.csv' WITH (FORMAT csv, HEADER true, ENCODING 'UTF-8');
 
+-- Ensure the stan id sequence is aligned with loaded data so future inserts work.
+SELECT setval(
+  pg_get_serial_sequence('stan', 'id'),
+  COALESCE((SELECT MAX(id) FROM stan), 0),
+  true
+);

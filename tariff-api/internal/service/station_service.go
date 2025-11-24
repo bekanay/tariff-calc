@@ -21,3 +21,11 @@ func (s *StationService) GetStations(filters model.Filters) ([]model.Station, mo
 
 	return stations, metadata, nil
 }
+
+func (s *StationService) AddStation(station model.Station) (model.Station, error) {
+	created, err := s.repo.AddStation(station)
+	if err != nil {
+		return model.Station{}, err
+	}
+	return created, nil
+}

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"tariff-api/internal/model"
 	"tariff-api/internal/service"
 
@@ -16,6 +17,39 @@ type StationHandler struct {
 
 func NewStationHandler(service *service.StationService) *StationHandler {
 	return &StationHandler{service: service}
+}
+
+func (h *StationHandler) AddStation(c *gin.Context) {
+	var input struct {
+		Kod       string `json:"stan_kod"`
+		Name      string `json:"stan_name"`
+		Priznak   int    `json:"stan_priznak"`
+		Paragraph string `json:"paragraph"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	input.Name = strings.TrimSpace(input.Name)
+	if input.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "stan_name is required"})
+		return
+	}
+
+	station, err := h.service.AddStation(model.Station{
+		Kod:       input.Kod,
+		Name:      input.Name,
+		Priznak:   input.Priznak,
+		Paragraph: strings.TrimSpace(input.Paragraph),
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, station)
 }
 
 func (h *StationHandler) GetStations(c *gin.Context) {

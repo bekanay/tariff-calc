@@ -60,6 +60,7 @@ func main() {
 	r.GET("/roles/:role", authHandler.CheckRole)
 
 	r.GET("/stations", mw.RequireRole(authService, cfg.KeyCloak.RequiredRole), stationHandler.GetStations)
+	r.POST("/stations", mw.RequireRole(authService, cfg.KeyCloak.RequiredRole), stationHandler.AddStation)
 
 	if err := r.Run(":8081"); err != nil {
 		log.WithError(err).Fatal("server shutdown due to startup failure")

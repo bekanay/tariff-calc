@@ -48,3 +48,27 @@ func (repo *StationRepository) GetStations(filters model.Filters) ([]model.Stati
 	metadata := model.CalculateMetadata(totalRecords, filters.Page, filters.PageSize)
 	return stations, metadata, nil
 }
+
+func (repo *StationRepository) AddStation(station model.Station) (model.Station, error) {
+	var (
+		paragraph sql.NullString
+		created   model.Station
+	)
+	if station.Paragraph != "" {
+		paragraph = sql.NullString{String: station.Paragraph, Valid: true}
+	}
+
+	err := repo.db.QueryRow(`
+		INSERT INTO stan (stan_kod, stan_name, stan_priznak, paragraph)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id, stan_kod, stan_name, stan_priznak, paragraph
+	`, station.Kod, station.Name, station.Priznak, paragraph).Scan(
+		&created.ID, &created.Kod, &created.Name, &created.Priznak, &paragraph,
+	)
+	if err != nil {
+		return model.Station{}, err
+	}
+
+	created.Paragraph = paragraph.String
+	return created, nil
+}
