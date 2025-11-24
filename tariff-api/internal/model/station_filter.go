@@ -10,6 +10,7 @@ type Filters struct {
 	PageSize     int
 	Sort         string
 	SortSafeList []string
+	Name         string
 }
 
 type Metadata struct {

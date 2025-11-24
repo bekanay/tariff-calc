@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -45,8 +46,19 @@ func (h *StationHandler) AddStation(c *gin.Context) {
 		Paragraph: strings.TrimSpace(input.Paragraph),
 	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		switch {
+		case errors.Is(err, service.ErrInvalidStationData):
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid station data",
+				"message": "Некорректный формат данных"})
+			return
+		case errors.Is(err, service.ErrDuplicateStation):
+			c.JSON(http.StatusConflict, gin.H{"error": "station already exists",
+				"message": "Станция уже существует"})
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 	}
 
 	c.JSON(http.StatusCreated, station)
@@ -69,6 +81,98 @@ func (h *StationHandler) GetStations(c *gin.Context) {
 		"stations": stations,
 		"metadata": metadata,
 	})
+}
+
+func (h *StationHandler) GetStation(c *gin.Context) {
+	kod := strings.TrimSpace(c.Param("kod"))
+	if kod == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid station code"})
+		return
+	}
+
+	station, err := h.service.GetStation(kod)
+	if err != nil {
+		switch {
+		case errors.Is(err, service.ErrStationNotFound):
+			c.JSON(http.StatusNotFound, gin.H{"error": "station not found"})
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, station)
+}
+
+func (h *StationHandler) UpdateStation(c *gin.Context) {
+	kod := strings.TrimSpace(c.Param("kod"))
+	if kod == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid station code"})
+		return
+	}
+
+	var input struct {
+		Kod       string `json:"stan_kod"`
+		Name      string `json:"stan_name"`
+		Priznak   int    `json:"stan_priznak"`
+		Paragraph string `json:"paragraph"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	station, err := h.service.UpdateStation(kod,
+		model.Station{
+			Kod:       input.Kod,
+			Name:      input.Name,
+			Priznak:   input.Priznak,
+			Paragraph: strings.TrimSpace(input.Paragraph),
+		})
+	if err != nil {
+		switch {
+		case errors.Is(err, service.ErrInvalidStationData):
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid station data"})
+			return
+		case errors.Is(err, service.ErrDuplicateStation):
+			c.JSON(http.StatusConflict, gin.H{"error": "station already exists"})
+			return
+		case errors.Is(err, service.ErrStationNotFound):
+			c.JSON(http.StatusNotFound, gin.H{"error": "station not found"})
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, station)
+}
+
+func (h *StationHandler) DeleteStation(c *gin.Context) {
+	kod := strings.TrimSpace(c.Param("kod"))
+	if kod == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid station code"})
+		return
+	}
+
+	if err := h.service.DeleteStation(kod); err != nil {
+		switch {
+		case errors.Is(err, service.ErrInvalidStationData):
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid station code"})
+			return
+		case errors.Is(err, service.ErrStationNotFound):
+			c.JSON(http.StatusNotFound, gin.H{"error": "station not found"})
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	c.Status(http.StatusNoContent)
 }
 
 func parseFilters(qs url.Values) (model.Filters, error) {
@@ -101,6 +205,10 @@ func parseFilters(qs url.Values) (model.Filters, error) {
 
 	if v := qs.Get("sort"); v != "" {
 		filters.Sort = v
+	}
+
+	if v := qs.Get("name"); v != "" {
+		filters.Name = strings.TrimSpace(v)
 	}
 
 	if !isSafeSort(filters.Sort, filters.SortSafeList) {

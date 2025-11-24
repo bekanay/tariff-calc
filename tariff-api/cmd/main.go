@@ -59,8 +59,14 @@ func main() {
 	r.POST("/logout", authHandler.Logout)
 	r.GET("/roles/:role", authHandler.CheckRole)
 
-	r.GET("/stations", mw.RequireRole(authService, cfg.KeyCloak.RequiredRole), stationHandler.GetStations)
-	r.POST("/stations", mw.RequireRole(authService, cfg.KeyCloak.RequiredRole), stationHandler.AddStation)
+	stationRoutes := r.Group("/stations", mw.RequireRole(authService, cfg.KeyCloak.RequiredRole))
+	{
+		stationRoutes.GET("", stationHandler.GetStations)
+		stationRoutes.GET("/:kod", stationHandler.GetStation)
+		stationRoutes.POST("", stationHandler.AddStation)
+		stationRoutes.PUT("/:kod", stationHandler.UpdateStation)
+		stationRoutes.DELETE("/:kod", stationHandler.DeleteStation)
+	}
 
 	if err := r.Run(":8081"); err != nil {
 		log.WithError(err).Fatal("server shutdown due to startup failure")
