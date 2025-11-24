@@ -13,11 +13,11 @@ func NewStationService(repo *repository.StationRepository) *StationService {
 	return &StationService{repo: repo}
 }
 
-func (s *StationService) GetStations() ([]model.Station, error) {
-	stations, err := s.repo.GetStations()
+func (s *StationService) GetStations(filters model.Filters) ([]model.Station, model.Metadata, error) {
+	stations, metadata, err := s.repo.GetStations(filters)
 	if err != nil {
-		return nil, err
+		return nil, model.Metadata{}, err
 	}
 
-	return stations, nil
+	return stations, metadata, nil
 }
