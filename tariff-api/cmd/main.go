@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/jackc/pgx/v5/stdlib"
+	_ "github.com/ibmdb/go_ibm_db"
 )
 
 func main() {
@@ -49,11 +49,16 @@ func main() {
 	stationRepo := repository.NewStationRepository(db)
 	stationService := service.NewStationService(stationRepo)
 	stationHandler := handler.NewStationHandler(stationService)
+	healthHandler := handler.NewHealthHandler(db)
+	metadataHandler := handler.NewMetadataHandler(db)
 
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(mw.RequestLogger(log), mw.CORS())
 
+	r.GET("/health/db", healthHandler.DB)
+	r.GET("/meta/tables", metadataHandler.ListTables)
+	r.POST("/meta/query", metadataHandler.Query)
 	r.POST("/login", authHandler.Login)
 	r.POST("/refresh-token", authHandler.RefreshToken)
 	r.POST("/logout", authHandler.Logout)
@@ -74,7 +79,7 @@ func main() {
 }
 
 func openDB(cfg *config.Config) (*sql.DB, error) {
-	db, err := sql.Open("pgx", cfg.Dsn)
+	db, err := sql.Open("go_ibm_db", cfg.Dsn)
 	if err != nil {
 		return nil, err
 	}

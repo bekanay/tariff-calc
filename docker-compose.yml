@@ -14,19 +14,11 @@ services:
       REDIRECT_URI: ${REDIRECT_URI}
       REQUIRED_ROLE: ${REQUIRED_ROLE}
       PORT: ${BACKEND_PORT}
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_NAME: tariff_db
-      DB_USER: user
-      DB_PASSWORD: password
-      DB_DSN: postgres://user:password@db:5432/tariff_db?sslmode=disable
+      DB_DSN: ${DB_DSN}
     working_dir: /app
     volumes:
       - ./.env:/app/.env:ro
     command: [ "app" ]
-    depends_on:
-      db:
-        condition: service_healthy
     networks:
       - backend_network
 
@@ -36,7 +28,6 @@ services:
       context: ./frontend
       args:
         VITE_URL: http://10.100.44.26:${BACKEND_PORT}
-        # VITE_URL: http://localhost:${BACKEND_PORT}
     container_name: tariff-frontend
     restart: unless-stopped
     ports:
@@ -45,28 +36,6 @@ services:
       - backend
     networks:
       - backend_network
-
-  db:
-    image: postgres:13
-    container_name: tariff-db
-    restart: unless-stopped
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_DB: tariff_db
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    volumes:
-      - ./db/init-scripts:/docker-entrypoint-initdb.d:ro
-      - ./data:/tmp/data:ro
-    networks:
-      - backend_network
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U user -d tariff_db" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
 
 networks:
   backend_network:
