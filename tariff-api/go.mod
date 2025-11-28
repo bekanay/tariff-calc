@@ -7,11 +7,19 @@ require (
 	github.com/gin-gonic/gin v1.11.0
 	github.com/ibmdb/go_ibm_db v0.5.4
 	github.com/joho/godotenv v1.5.1
+	github.com/jackc/pgconn v1.14.3
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.3
 )
 
-require github.com/ibmruntimes/go-recordio/v2 v2.0.0-20240416213906-ae0ad556db70 // indirect
+require (
+	github.com/ibmruntimes/go-recordio/v2 v2.0.0-20240416213906-ae0ad556db70 // indirect
+	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
+	github.com/jackc/pgio v1.0.0 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgproto3/v2 v2.3.3 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
+)
 
 require (
 	github.com/bytedance/sonic v1.14.0 // indirect
