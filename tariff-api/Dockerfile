@@ -44,6 +44,8 @@ COPY --from=build /opt/ibm/clidriver /opt/ibm/clidriver
 
 ENV IBM_DB_HOME=/opt/ibm/clidriver
 ENV LD_LIBRARY_PATH=${IBM_DB_HOME}/lib
+ENV DB2CODEPAGE=1208
+ENV LANG=C.UTF-8
 
 USER appuser
 EXPOSE 8081

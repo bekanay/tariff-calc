@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 	"tariff-api/internal/model"
+
+	"github.com/jackc/pgconn"
 )
 
 type StationRepository struct {
@@ -29,16 +31,14 @@ func (repo *StationRepository) AddStation(station model.Station) (model.Station,
 	}
 
 	err := repo.db.QueryRow(`
-		SELECT id, stan_kod, stan_name, stan_priznak, paragraph
-		FROM FINAL TABLE (
-			INSERT INTO stan (stan_kod, stan_name, stan_priznak, paragraph)
-			VALUES (?, ?, ?, ?)
-		)
+		INSERT INTO stan (stan_kod, stan_name, stan_priznak, paragraph)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id, stan_kod, stan_name, stan_priznak, paragraph
 	`, station.Kod, station.Name, station.Priznak, paragraph).Scan(
 		&created.ID, &created.Kod, &created.Name, &created.Priznak, &paragraph,
 	)
 	if err != nil {
-		if isDB2UniqueViolation(err) {
+		if isUniqueViolation(err) {
 			return model.Station{}, ErrDuplicateStation
 		}
 		return model.Station{}, err
@@ -50,13 +50,15 @@ func (repo *StationRepository) AddStation(station model.Station) (model.Station,
 
 func (repo *StationRepository) GetStations(filters model.Filters) ([]model.Station, model.Metadata, error) {
 	var (
-		args    []any
-		clauses []string
+		args      []any
+		clauses   []string
+		argNumber = 1
 	)
 
 	if filters.Name != "" {
-		clauses = append(clauses, "LOWER(stan_name) LIKE LOWER(?)")
+		clauses = append(clauses, fmt.Sprintf("LOWER(stan_name) LIKE LOWER($%d)", argNumber))
 		args = append(args, "%"+filters.Name+"%")
+		argNumber++
 	}
 
 	queryBuilder := strings.Builder{}
@@ -69,9 +71,9 @@ func (repo *StationRepository) GetStations(filters model.Filters) ([]model.Stati
 	}
 	queryBuilder.WriteString(fmt.Sprintf(`
 		ORDER BY %s %s, id ASC
-		OFFSET ? ROWS FETCH NEXT ? ROWS ONLY`, filters.SortColumn(), filters.SortDirection()))
+		LIMIT $%d OFFSET $%d`, filters.SortColumn(), filters.SortDirection(), argNumber, argNumber+1))
 
-	args = append(args, filters.Offset(), filters.Limit())
+	args = append(args, filters.Limit(), filters.Offset())
 
 	rows, err := repo.db.Query(queryBuilder.String(), args...)
 	if err != nil {
@@ -102,13 +104,13 @@ func (repo *StationRepository) GetStations(filters model.Filters) ([]model.Stati
 	return stations, metadata, nil
 }
 
-func isDB2UniqueViolation(err error) bool {
-	if err == nil {
-		return false
+func isUniqueViolation(err error) bool {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+		return true
 	}
-	msg := strings.ToUpper(err.Error())
-	// DB2 unique constraint violation typically returns SQLSTATE 23505 or SQL0803N.
-	return strings.Contains(msg, "SQLSTATE=23505") || strings.Contains(msg, "SQL0803")
+	msg := strings.ToLower(err.Error())
+	return strings.Contains(msg, "duplicate key value violates unique constraint")
 }
 
 func (repo *StationRepository) GetStationByKod(kod string) (model.Station, error) {
@@ -119,7 +121,7 @@ func (repo *StationRepository) GetStationByKod(kod string) (model.Station, error
 	err := repo.db.QueryRow(`
 		SELECT id, stan_kod, stan_name, stan_priznak, paragraph
 		FROM stan
-		WHERE stan_kod = ?
+		WHERE stan_kod = $1
 	`, kod).Scan(&station.ID, &station.Kod, &station.Name, &station.Priznak, &paragraph)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -138,12 +140,10 @@ func (repo *StationRepository) UpdateStation(existingKod string, station model.S
 	}
 
 	err := repo.db.QueryRow(`
-		SELECT id, stan_kod, stan_name, stan_priznak, paragraph
-		FROM FINAL TABLE (
-			UPDATE stan
-			SET stan_kod = ?, stan_name = ?, stan_priznak = ?, paragraph = ?
-			WHERE stan_kod = ?
-		)
+		UPDATE stan
+		SET stan_kod = $1, stan_name = $2, stan_priznak = $3, paragraph = $4
+		WHERE stan_kod = $5
+		RETURNING id, stan_kod, stan_name, stan_priznak, paragraph
 	`, station.Kod, station.Name, station.Priznak, paragraph, existingKod).Scan(
 		&station.ID, &station.Kod, &station.Name, &station.Priznak, &paragraph,
 	)
@@ -151,7 +151,7 @@ func (repo *StationRepository) UpdateStation(existingKod string, station model.S
 		if errors.Is(err, sql.ErrNoRows) {
 			return model.Station{}, ErrStationNotFound
 		}
-		if isDB2UniqueViolation(err) {
+		if isUniqueViolation(err) {
 			return model.Station{}, ErrDuplicateStation
 		}
 		return model.Station{}, err
@@ -161,7 +161,7 @@ func (repo *StationRepository) UpdateStation(existingKod string, station model.S
 }
 
 func (repo *StationRepository) DeleteStationByKod(kod string) error {
-	res, err := repo.db.Exec(`DELETE FROM stan WHERE stan_kod = ?`, kod)
+	res, err := repo.db.Exec(`DELETE FROM stan WHERE stan_kod = $1`, kod)
 	if err != nil {
 		return err
 	}
