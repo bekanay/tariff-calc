@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -15,9 +16,10 @@ type Config struct {
 		RedirectURI  string
 		RequiredRole string
 	}
-	Dsn      string
+	PgDsn    string
 	LogLevel string
 	GinMode  string
+	Port     string
 }
 
 func LoadConfig() (*Config, error) {
@@ -34,9 +36,18 @@ func LoadConfig() (*Config, error) {
 	cfg.KeyCloak.RedirectURI = os.Getenv("REDIRECT_URI")
 	cfg.KeyCloak.RequiredRole = os.Getenv("REQUIRED_ROLE")
 
-	cfg.Dsn = os.Getenv("DB_DSN")
+	cfg.PgDsn = os.Getenv("PG_DSN")
 	cfg.LogLevel = os.Getenv("LOG_LEVEL")
 	cfg.GinMode = os.Getenv("GIN_MODE")
+	cfg.Port = os.Getenv("PORT")
+
+	if cfg.Port == "" {
+		cfg.Port = "8081"
+	}
+
+	if cfg.PgDsn == "" {
+		return nil, fmt.Errorf("PG_DSN is required")
+	}
 
 	return cfg, nil
 }

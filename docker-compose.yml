@@ -1,8 +1,30 @@
 services:
+  db:
+    image: postgres:13
+    container_name: tariff-pg
+    environment:
+      POSTGRES_DB: tariff
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/init-scripts:/docker-entrypoint-initdb.d:ro
+    networks:
+      - backend_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-tariff}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   backend:
     image: calculator-backend
     build: ./tariff-api
     container_name: tariff-api
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
@@ -14,11 +36,27 @@ services:
       REDIRECT_URI: ${REDIRECT_URI}
       REQUIRED_ROLE: ${REQUIRED_ROLE}
       PORT: ${BACKEND_PORT}
-      DB_DSN: ${DB_DSN}
+      PG_DSN: ${PG_DSN:-postgres://postgres:postgres@db:5432/tariff?sslmode=disable}
     working_dir: /app
     volumes:
       - ./.env:/app/.env:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     command: [ "app" ]
+    networks:
+      - backend_network
+
+  syncstan:
+    image: calculator-backend
+    build: ./tariff-api
+    container_name: sync-stan
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB2_DSN: ${DB2_DSN}
+      PG_DSN: ${PG_DSN:-postgres://postgres:postgres@db:5432/tariff?sslmode=disable}
+    command: [ "syncstan" ]
     networks:
       - backend_network
 

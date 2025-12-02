@@ -26,7 +26,8 @@ ENV CGO_CFLAGS=-I${IBM_DB_HOME}/include
 ENV CGO_LDFLAGS=-L${IBM_DB_HOME}/lib
 
 COPY . .
-RUN go build -ldflags="-s -w" -o /app/app ./cmd
+RUN go build -ldflags="-s -w" -o /app/app ./cmd && \
+    go build -ldflags="-s -w" -o /app/syncstan ./cmd/sync_stan
 
 # --- runtime stage ---
 FROM debian:bookworm-slim
@@ -40,6 +41,7 @@ RUN useradd -m appuser && \
 
 # Copy app binary and DB2 CLI driver
 COPY --from=build /app/app /usr/local/bin/app
+COPY --from=build /app/syncstan /usr/local/bin/syncstan
 COPY --from=build /opt/ibm/clidriver /opt/ibm/clidriver
 
 ENV IBM_DB_HOME=/opt/ibm/clidriver

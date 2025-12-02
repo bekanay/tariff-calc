@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/ibmdb/go_ibm_db"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func main() {
@@ -73,13 +73,14 @@ func main() {
 		stationRoutes.DELETE("/:kod", stationHandler.DeleteStation)
 	}
 
-	if err := r.Run(":8081"); err != nil {
+	addr := ":" + cfg.Port
+	if err := r.Run(addr); err != nil {
 		log.WithError(err).Fatal("server shutdown due to startup failure")
 	}
 }
 
 func openDB(cfg *config.Config) (*sql.DB, error) {
-	db, err := sql.Open("go_ibm_db", cfg.Dsn)
+	db, err := sql.Open("pgx", cfg.PgDsn)
 	if err != nil {
 		return nil, err
 	}
