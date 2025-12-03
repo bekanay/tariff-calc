@@ -26,6 +26,12 @@ type Client struct {
 	log *logrus.Entry
 }
 
+// DB exposes the underlying connection pool for shared use.
+// Caller must not close it directly; use Client.Close instead.
+func (c *Client) DB() *sql.DB {
+	return c.db
+}
+
 // New creates a pooled DB2 client using the provided DSN.
 // The caller owns the returned client and should Close it when done.
 func New(cfg Config, log *logrus.Logger) (*Client, error) {

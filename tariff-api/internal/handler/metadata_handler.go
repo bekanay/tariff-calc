@@ -23,10 +23,10 @@ func (h *MetadataHandler) ListTables(c *gin.Context) {
 	defer cancel()
 
 	rows, err := h.db.QueryContext(ctx, `
-		SELECT tabschema, tabname, type
-		FROM syscat.tables
-		WHERE tabschema = CURRENT SCHEMA
-		ORDER BY tabname`)
+		SELECT table_schema, table_name, table_type
+		FROM information_schema.tables
+		WHERE table_schema = current_schema()
+		ORDER BY table_name`)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

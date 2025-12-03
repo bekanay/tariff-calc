@@ -8,6 +8,7 @@ import (
 	"tariff-api/internal/logger"
 	mw "tariff-api/internal/middleware"
 	"tariff-api/internal/repository"
+	"tariff-api/internal/db2"
 	"tariff-api/internal/service"
 	"time"
 
@@ -42,6 +43,17 @@ func main() {
 
 	log.Info("database connection established")
 
+	db2Client, err := db2.New(db2.Config{DSN: cfg.Db2Dsn}, log)
+	if err != nil {
+		log.WithError(err).Fatal("db2 connection failed")
+	}
+	defer func() {
+		if err := db2Client.Close(); err != nil {
+			log.WithError(err).Warn("db2 close error")
+		}
+	}()
+	log.Info("db2 connection established")
+
 	authRepo := repository.NewAuthRepository(cfg)
 	authService := service.NewAuthService(authRepo, cfg.KeyCloak.RequiredRole)
 	authHandler := handler.NewAuthHandler(authService)
@@ -51,6 +63,7 @@ func main() {
 	stationHandler := handler.NewStationHandler(stationService)
 	healthHandler := handler.NewHealthHandler(db)
 	metadataHandler := handler.NewMetadataHandler(db)
+	db2QueryHandler := handler.NewDB2QueryHandler(db2Client.DB())
 
 	r := gin.New()
 	r.Use(gin.Recovery())
@@ -59,12 +72,13 @@ func main() {
 	r.GET("/health/db", healthHandler.DB)
 	r.GET("/meta/tables", metadataHandler.ListTables)
 	r.POST("/meta/query", metadataHandler.Query)
+	r.POST("/meta/db2/query", db2QueryHandler.Query)
 	r.POST("/login", authHandler.Login)
 	r.POST("/refresh-token", authHandler.RefreshToken)
 	r.POST("/logout", authHandler.Logout)
 	r.GET("/roles/:role", authHandler.CheckRole)
 
-	stationRoutes := r.Group("/stations", mw.RequireRole(authService, cfg.KeyCloak.RequiredRole))
+	stationRoutes := r.Group("/stations")
 	{
 		stationRoutes.GET("", stationHandler.GetStations)
 		stationRoutes.GET("/:kod", stationHandler.GetStation)

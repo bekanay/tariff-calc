@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"tariff-api/internal/db2"
 
@@ -18,7 +19,7 @@ import (
 func SyncStan(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, error) {
 	const selectStan = `
 		SELECT STAN_ID, KOD, NAME, PARAGRAF, PR
-		FROM FKI_STAN
+		FROM FKI_STAN WHERE ADM = 27 AND DOR = 68
 	`
 	const upsertStan = `
 		INSERT INTO stan (id, stan_kod, stan_name, stan_priznak, paragraph)
@@ -64,8 +65,8 @@ func SyncStan(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, erro
 		if kod.Valid {
 			stanKod = strconv.FormatInt(kod.Int64, 10)
 		}
-		stanName := strings.TrimSpace(decodeCP1251(name.String))
-		decodedParagraph := strings.TrimSpace(decodeCP1251(paragraph.String))
+		stanName := strings.TrimSpace(decodeMaybeCP1251(name.String))
+		decodedParagraph := strings.TrimSpace(decodeMaybeCP1251(paragraph.String))
 		stanParagraph := sql.NullString{
 			String: decodedParagraph,
 			Valid:  paragraph.Valid && decodedParagraph != "",
@@ -76,7 +77,6 @@ func SyncStan(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, erro
 		}
 
 		if stanKod == "" || stanName == "" {
-			// Required columns; skip instead of failing the whole batch.
 			continue
 		}
 
@@ -107,10 +107,13 @@ func SyncStan(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, erro
 	return inserted, nil
 }
 
-func decodeCP1251(s string) string {
+// decodeMaybeCP1251 returns UTF-8 text, only decoding when input is not valid UTF-8.
+func decodeMaybeCP1251(s string) string {
+	if utf8.ValidString(s) {
+		return s
+	}
 	decoded, err := charmap.Windows1251.NewDecoder().String(s)
 	if err != nil {
-		// Fall back to the original string if decoding fails.
 		return s
 	}
 	return decoded

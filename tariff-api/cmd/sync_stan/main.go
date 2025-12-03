@@ -50,6 +50,12 @@ func main() {
 		log.WithError(err).Fatal("stan sync failed")
 	}
 	log.Infof("stan sync complete: upserted %d rows", rows)
+
+	tipUchRows, err := etl.SyncTipUch(ctx, db2Client, pgDB)
+	if err != nil {
+		log.WithError(err).Fatal("tip_uch sync failed")
+	}
+	log.Infof("tip_uch sync complete: upserted %d rows", tipUchRows)
 }
 
 func pingWithTimeout(db *sql.DB, timeout time.Duration) error {
