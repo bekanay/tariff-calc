@@ -56,6 +56,18 @@ func main() {
 		log.WithError(err).Fatal("tip_uch sync failed")
 	}
 	log.Infof("tip_uch sync complete: upserted %d rows", tipUchRows)
+
+	uchRows, err := etl.SyncUch(ctx, db2Client, pgDB)
+	if err != nil {
+		log.WithError(err).Fatal("uch sync failed")
+	}
+	log.Infof("uch sync complete: upserted %d rows", uchRows)
+
+	trPunktRows, err := etl.SyncTrPunkt(ctx, db2Client, pgDB)
+	if err != nil {
+		log.WithError(err).Fatal("tr_punkt sync failed")
+	}
+	log.Infof("tr_punkt sync complete: upserted %d rows", trPunktRows)
 }
 
 func pingWithTimeout(db *sql.DB, timeout time.Duration) error {
