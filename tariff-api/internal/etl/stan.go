@@ -22,8 +22,8 @@ func SyncStan(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, erro
 		FROM FKI_STAN WHERE ADM = 27 AND DOR = 68
 	`
 	const upsertStan = `
-		INSERT INTO stan (id, stan_kod, stan_name, stan_priznak, paragraph)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO stan (stan_kod, stan_name, stan_priznak, paragraph)
+		VALUES ($1, $2, $3, $4)
 		ON CONFLICT (stan_kod) DO UPDATE
 		SET stan_name = EXCLUDED.stan_name,
 			stan_priznak = EXCLUDED.stan_priznak,
@@ -50,13 +50,12 @@ func SyncStan(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, erro
 	inserted := 0
 	for rows.Next() {
 		var (
-			id        sql.NullInt64
 			kod       sql.NullInt64
 			name      sql.NullString
 			paragraph sql.NullString
 			priznak   sql.NullInt64
 		)
-		if err := rows.Scan(&id, &kod, &name, &paragraph, &priznak); err != nil {
+		if err := rows.Scan(new(sql.NullInt64), &kod, &name, &paragraph, &priznak); err != nil {
 			_ = tx.Rollback()
 			return inserted, fmt.Errorf("scan DB2 stan row: %w", err)
 		}
@@ -80,7 +79,7 @@ func SyncStan(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, erro
 			continue
 		}
 
-		if _, err := stmt.ExecContext(ctx, id.Int64, stanKod, stanName, stanPriznak, stanParagraph); err != nil {
+		if _, err := stmt.ExecContext(ctx, stanKod, stanName, stanPriznak, stanParagraph); err != nil {
 			_ = tx.Rollback()
 			return inserted, fmt.Errorf("upsert stan %s: %w", stanKod, err)
 		}
@@ -91,16 +90,6 @@ func SyncStan(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, erro
 		return inserted, fmt.Errorf("iterate DB2 stan rows: %w", err)
 	}
 
-	if _, err := tx.ExecContext(ctx, `
-		SELECT setval(
-			pg_get_serial_sequence('stan', 'id'),
-			COALESCE((SELECT MAX(id) FROM stan), 0),
-			true
-		)`); err != nil {
-		_ = tx.Rollback()
-		return inserted, fmt.Errorf("refresh stan id sequence: %w", err)
-	}
-
 	if err := tx.Commit(); err != nil {
 		return inserted, fmt.Errorf("commit stan sync: %w", err)
 	}
@@ -109,12 +98,25 @@ func SyncStan(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, erro
 
 // decodeMaybeCP1251 returns UTF-8 text, only decoding when input is not valid UTF-8.
 func decodeMaybeCP1251(s string) string {
-	if utf8.ValidString(s) {
+	if s == "" {
 		return s
 	}
-	decoded, err := charmap.Windows1251.NewDecoder().String(s)
-	if err != nil {
+
+	// If it's not valid UTF-8, decode as CP1251.
+	if !utf8.ValidString(s) {
+		decoded, err := charmap.Windows1251.NewDecoder().String(s)
+		if err == nil {
+			return decoded
+		}
 		return s
 	}
-	return decoded
+
+	// Heuristic: many CP1251 strings misread as UTF-8 start with mojibake like "Ð" / "Ñ".
+	if strings.ContainsAny(s, "ÐÑ") {
+		if decoded, err := charmap.Windows1251.NewDecoder().String(s); err == nil && utf8.ValidString(decoded) {
+			return decoded
+		}
+	}
+
+	return s
 }

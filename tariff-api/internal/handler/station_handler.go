@@ -56,7 +56,7 @@ func (h *StationHandler) AddStation(c *gin.Context) {
 				"message": "Станция уже существует"})
 			return
 		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			respondInternalError(c)
 			return
 		}
 	}
@@ -73,7 +73,7 @@ func (h *StationHandler) GetStations(c *gin.Context) {
 
 	stations, metadata, err := h.service.GetStations(filters)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		respondInternalError(c)
 		return
 	}
 
@@ -97,7 +97,7 @@ func (h *StationHandler) GetStation(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "station not found"})
 			return
 		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			respondInternalError(c)
 			return
 		}
 	}
@@ -143,7 +143,7 @@ func (h *StationHandler) UpdateStation(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "station not found"})
 			return
 		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			respondInternalError(c)
 			return
 		}
 	}
@@ -167,7 +167,7 @@ func (h *StationHandler) DeleteStation(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "station not found"})
 			return
 		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			respondInternalError(c)
 			return
 		}
 	}
@@ -230,3 +230,10 @@ func isSafeSort(sort string, safelist []string) bool {
 type ErrInvalidFilter string
 
 func (e ErrInvalidFilter) Error() string { return string(e) }
+
+func respondInternalError(c *gin.Context) {
+	c.JSON(http.StatusInternalServerError, gin.H{
+		"error":   "internal_server_error",
+		"message": "Внутренняя ошибка сервера",
+	})
+}

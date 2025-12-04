@@ -68,6 +68,36 @@ func main() {
 		log.WithError(err).Fatal("tr_punkt sync failed")
 	}
 	log.Infof("tr_punkt sync complete: upserted %d rows", trPunktRows)
+
+	komOperRows, err := etl.SyncKomOper(ctx, db2Client, pgDB)
+	if err != nil {
+		log.WithError(err).Fatal("kom_oper sync failed")
+	}
+	log.Infof("kom_oper sync complete: upserted %d rows", komOperRows)
+
+	uchUzelRows, err := etl.SyncUchUzel(ctx, db2Client, pgDB)
+	if err != nil {
+		log.WithError(err).Fatal("uch_uzel sync failed")
+	}
+	log.Infof("uch_uzel sync complete: upserted %d rows", uchUzelRows)
+
+	tarifStanRows, err := etl.SyncTarifStan(ctx, db2Client, pgDB)
+	if err != nil {
+		log.WithError(err).Fatal("tarif_stan sync failed")
+	}
+	log.Infof("tarif_stan sync complete: upserted %d rows", tarifStanRows)
+
+	stanZdRows, err := etl.SyncStanZd(ctx, db2Client, pgDB)
+	if err != nil {
+		log.WithError(err).Fatal("stan_zd sync failed")
+	}
+	log.Infof("stan_zd sync complete: upserted %d rows", stanZdRows)
+
+	tarifTrRows, err := etl.SyncTarifTr(ctx, db2Client, pgDB)
+	if err != nil {
+		log.WithError(err).Fatal("tarif_tr sync failed")
+	}
+	log.Infof("tarif_tr sync complete: upserted %d rows", tarifTrRows)
 }
 
 func pingWithTimeout(db *sql.DB, timeout time.Duration) error {

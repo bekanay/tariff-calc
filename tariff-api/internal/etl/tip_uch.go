@@ -10,7 +10,7 @@ import (
 )
 
 // SyncTipUch copies tip_uch dictionary rows from DB2 into Postgres.
-// It upserts on id (OBJECT_KOD) to keep the table idempotent.
+// It upserts on kod (OBJECT_KOD) to keep the table idempotent.
 func SyncTipUch(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, error) {
 	const selectTipUch = `
         SELECT OBJECT_KOD, OBJECT_NAME, COR_TIP, DATE_ND, DATE_KD, COR_TIME
@@ -19,11 +19,10 @@ func SyncTipUch(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, er
     `
 
 	const upsertTipUch = `
-        INSERT INTO tip_uch (id, kod, name, tip_corr, date_start, date_end, upd_time)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
-        ON CONFLICT (id) DO UPDATE
-        SET kod = EXCLUDED.kod,
-            name = EXCLUDED.name,
+        INSERT INTO tip_uch (kod, name, tip_corr, date_start, date_end, upd_time)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        ON CONFLICT (kod) DO UPDATE
+        SET name = EXCLUDED.name,
             tip_corr = EXCLUDED.tip_corr,
             date_start = EXCLUDED.date_start,
             date_end = EXCLUDED.date_end,
@@ -77,7 +76,6 @@ func SyncTipUch(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, er
 
 		if _, err := stmt.ExecContext(
 			ctx,
-			objectKod.Int64, // id
 			objectKod.Int64, // kod
 			name,
 			tipCorr,

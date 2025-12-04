@@ -4,15 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"hash/fnv"
-	"math"
 	"strings"
 
 	"tariff-api/internal/db2"
 )
 
 // SyncTarifTr copies tariff distances between transit points from DB2 into Postgres.
-// It upserts deterministically on a generated id derived from (tr_start, tr_end).
+// It upserts on the (tr_start, tr_end) pair to keep the table idempotent.
 func SyncTarifTr(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, error) {
 	const selectTarifTr = `
 		SELECT STAN1, STAN2, KM, COR_TIME, COR_TIP, DATE_ND
@@ -21,12 +19,10 @@ func SyncTarifTr(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, e
 	`
 
 	const upsertTarifTr = `
-		INSERT INTO tarif_tr (id, tr_start, tr_end, dist_tr, updated_at, tip_corr, date_start)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		ON CONFLICT (id) DO UPDATE
-		SET tr_start = EXCLUDED.tr_start,
-			tr_end = EXCLUDED.tr_end,
-			dist_tr = EXCLUDED.dist_tr,
+		INSERT INTO tarif_tr (tr_start, tr_end, dist_tr, updated_at, tip_corr, date_start)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		ON CONFLICT (tr_start, tr_end) DO UPDATE
+		SET dist_tr = EXCLUDED.dist_tr,
 			updated_at = EXCLUDED.updated_at,
 			tip_corr = EXCLUDED.tip_corr,
 			date_start = EXCLUDED.date_start
@@ -37,6 +33,29 @@ func SyncTarifTr(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, e
 		return 0, fmt.Errorf("query DB2 tarif_tr rows: %w", err)
 	}
 	defer rows.Close()
+
+	validTr := make(map[string]struct{})
+	trRows, err := pg.QueryContext(ctx, `SELECT tr FROM tr_punkt`)
+	if err != nil {
+		return 0, fmt.Errorf("load tr_punkt codes: %w", err)
+	}
+	for trRows.Next() {
+		var code string
+		if err := trRows.Scan(&code); err != nil {
+			trRows.Close()
+			return 0, fmt.Errorf("scan tr_punkt code: %w", err)
+		}
+		code = strings.TrimSpace(code)
+		if code != "" {
+			validTr[code] = struct{}{}
+		}
+	}
+	if err := trRows.Close(); err != nil {
+		return 0, fmt.Errorf("close tr_punkt codes: %w", err)
+	}
+	if err := trRows.Err(); err != nil {
+		return 0, fmt.Errorf("iterate tr_punkt codes: %w", err)
+	}
 
 	tx, err := pg.BeginTx(ctx, nil)
 	if err != nil {
@@ -70,13 +89,17 @@ func SyncTarifTr(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, e
 		if start == "" || end == "" {
 			continue
 		}
+		if _, ok := validTr[start]; !ok {
+			continue
+		}
+		if _, ok := validTr[end]; !ok {
+			continue
+		}
 
-		id := hashPair(start, end)
 		tipCorr := strings.TrimSpace(corTip.String)
 
 		if _, err := stmt.ExecContext(
 			ctx,
-			id,
 			start,
 			end,
 			km,
@@ -100,13 +123,4 @@ func SyncTarifTr(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, e
 	}
 
 	return inserted, nil
-}
-
-// hashPair returns a stable positive int64 hash for a pair of strings.
-func hashPair(a, b string) int64 {
-	h := fnv.New64a()
-	_, _ = h.Write([]byte(a))
-	_, _ = h.Write([]byte{':'})
-	_, _ = h.Write([]byte(b))
-	return int64(h.Sum64() & math.MaxInt64)
 }

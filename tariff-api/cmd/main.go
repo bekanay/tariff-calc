@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"tariff-api/internal/config"
+	"tariff-api/internal/db2"
 	"tariff-api/internal/handler"
 	"tariff-api/internal/logger"
 	mw "tariff-api/internal/middleware"
 	"tariff-api/internal/repository"
-	"tariff-api/internal/db2"
 	"tariff-api/internal/service"
 	"time"
 
@@ -64,6 +64,7 @@ func main() {
 	healthHandler := handler.NewHealthHandler(db)
 	metadataHandler := handler.NewMetadataHandler(db)
 	db2QueryHandler := handler.NewDB2QueryHandler(db2Client.DB())
+	stationProtected := mw.RequireRole(authService, cfg.KeyCloak.RequiredRole)
 
 	r := gin.New()
 	r.Use(gin.Recovery())
@@ -79,6 +80,7 @@ func main() {
 	r.GET("/roles/:role", authHandler.CheckRole)
 
 	stationRoutes := r.Group("/stations")
+	stationRoutes.Use(stationProtected)
 	{
 		stationRoutes.GET("", stationHandler.GetStations)
 		stationRoutes.GET("/:kod", stationHandler.GetStation)

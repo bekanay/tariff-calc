@@ -19,8 +19,8 @@ func SyncUch(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, error
 	`
 
 	const upsertUch = `
-		INSERT INTO uch (id, uch_num, uch_name, uch_tip)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO uch (uch_num, uch_name, uch_tip)
+		VALUES ($1, $2, $3)
 		ON CONFLICT (uch_num) DO UPDATE
 		SET uch_name = EXCLUDED.uch_name,
 			uch_tip = EXCLUDED.uch_tip
@@ -65,13 +65,7 @@ func SyncUch(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, error
 			continue
 		}
 
-		if _, err := stmt.ExecContext(
-			ctx,
-			num.Int64, // id
-			num.Int64, // uch_num
-			uchName,
-			tip.Int64,
-		); err != nil {
+		if _, err := stmt.ExecContext(ctx, num.Int64, uchName, tip.Int64); err != nil {
 			_ = tx.Rollback()
 			return inserted, fmt.Errorf("upsert uch %d: %w", num.Int64, err)
 		}

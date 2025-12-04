@@ -20,8 +20,8 @@ func SyncTrPunkt(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, e
 	`
 
 	const upsertTrPunkt = `
-		INSERT INTO tr_punkt (id, tr, updated_at, tip_corr, date_start)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO tr_punkt (tr, updated_at, tip_corr, date_start)
+		VALUES ($1, $2, $3, $4)
 		ON CONFLICT (tr) DO UPDATE
 		SET updated_at = EXCLUDED.updated_at,
 			tip_corr = EXCLUDED.tip_corr,
@@ -38,6 +38,7 @@ func SyncTrPunkt(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, e
 	if err != nil {
 		return 0, fmt.Errorf("begin postgres transaction: %w", err)
 	}
+
 	stmt, err := tx.PrepareContext(ctx, upsertTrPunkt)
 	if err != nil {
 		_ = tx.Rollback()
@@ -70,14 +71,7 @@ func SyncTrPunkt(ctx context.Context, db2Client *db2.Client, pg *sql.DB) (int, e
 
 		tipCorr := strings.TrimSpace(corTip.String)
 
-		if _, err := stmt.ExecContext(
-			ctx,
-			kod.Int64, // id
-			trCode,    // tr
-			corTime,   // updated_at
-			tipCorr,   // tip_corr
-			dateNd,    // date_start
-		); err != nil {
+		if _, err := stmt.ExecContext(ctx, trCode, corTime, tipCorr, dateNd); err != nil {
 			_ = tx.Rollback()
 			return inserted, fmt.Errorf("upsert tr_punkt %s: %w", trCode, err)
 		}
