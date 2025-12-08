@@ -61,13 +61,19 @@ func (repo *StationRepository) GetStations(filters model.Filters) ([]model.Stati
 		argNumber++
 	}
 
+	if filters.Paragraph != "" {
+		clauses = append(clauses, fmt.Sprintf("LOWER(paragraph) LIKE LOWER($%d)", argNumber))
+		args = append(args, "%"+filters.Paragraph+"%")
+		argNumber++
+	}
+
 	queryBuilder := strings.Builder{}
 	queryBuilder.WriteString(`
 		SELECT count(*) OVER(), id, stan_kod, stan_name, stan_priznak, paragraph
 		FROM stan`)
 	if len(clauses) > 0 {
 		queryBuilder.WriteString(" WHERE ")
-		queryBuilder.WriteString(strings.Join(clauses, " AND "))
+		queryBuilder.WriteString(strings.Join(clauses, " OR "))
 	}
 	queryBuilder.WriteString(fmt.Sprintf(`
 		ORDER BY %s %s, id ASC

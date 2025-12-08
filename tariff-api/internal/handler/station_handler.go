@@ -184,6 +184,7 @@ func parseFilters(qs url.Values) (model.Filters, error) {
 			"id", "-id",
 			"stan_kod", "-stan_kod",
 			"stan_name", "-stan_name",
+			"paragraph", "-paragraph",
 		},
 	}
 
@@ -209,6 +210,10 @@ func parseFilters(qs url.Values) (model.Filters, error) {
 
 	if v := qs.Get("name"); v != "" {
 		filters.Name = strings.TrimSpace(v)
+	}
+
+	if v := qs.Get("paragraph"); v != "" {
+		filters.Paragraph = strings.TrimSpace(v)
 	}
 
 	if !isSafeSort(filters.Sort, filters.SortSafeList) {

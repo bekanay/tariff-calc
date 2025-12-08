@@ -11,6 +11,7 @@ type Filters struct {
 	Sort         string
 	SortSafeList []string
 	Name         string
+	Paragraph    string
 }
 
 type Metadata struct {
