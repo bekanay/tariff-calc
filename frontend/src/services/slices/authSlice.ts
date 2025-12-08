@@ -1,11 +1,35 @@
-import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import type { TAuthState, TUserData } from '../../utils/types'
-import { loginApi, logoutApi } from '../api/authApi'
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import type { TLoginData } from '../../utils/types'
+import { loginApi, logoutApi, refreshToken } from '../api/authApi'
 import { deleteCookie, getCookie, setCookie } from '../../utils/cookie'
+
+interface AuthInitState {
+  isAuth: boolean
+  errorText: string | null
+  isLoading: boolean
+  isInit: boolean
+  rememberMe: boolean
+}
+
+export const initializeAuth = createAsyncThunk('auth/initializeAuth', async () => {
+  const access = getCookie('accessToken')
+  const refresh = localStorage.getItem('refreshToken') || sessionStorage.getItem('refreshToken')
+
+  if (!refresh) return false
+
+  if (access) return true
+
+  try {
+    await refreshToken()
+    return true
+  } catch {
+    return false
+  }
+})
 
 export const login = createAsyncThunk(
   'auth/login',
-  async ({ username, password, rememberMe }: TUserData & { rememberMe: boolean }) => {
+  async ({ username, password, rememberMe }: TLoginData & { rememberMe: boolean }) => {
     const response = await loginApi({ username, password })
     return { ...response, rememberMe }
   }
@@ -13,30 +37,31 @@ export const login = createAsyncThunk(
 
 export const logout = createAsyncThunk('auth/logout', async () => logoutApi())
 
-export const initialState: TAuthState = {
+export const initialState: AuthInitState = {
   isAuth: false,
   errorText: null,
   isLoading: false,
   isInit: false,
-  rememberMe: false
+  rememberMe: false,
 }
 
-export const AuthSlice = createSlice({
+export const authSlice = createSlice({
   name: 'auth',
   initialState,
-  reducers: {
-    initializeAuth(state) {
-      const accessToken = getCookie('accessToken')
-      const refreshToken = localStorage.getItem('refreshToken') || sessionStorage.getItem('refreshToken')
-      state.isAuth = !!(accessToken && refreshToken)
-      state.isInit = true
-    },
-    setRememberMe(state, action: PayloadAction<boolean>) {
-      state.rememberMe = action.payload
-    }
-  },
+  reducers: {},
   extraReducers(builder) {
     builder
+      .addCase(initializeAuth.pending, (state) => {
+        state.isInit = false
+      })
+      .addCase(initializeAuth.fulfilled, (state, action) => {
+        state.isAuth = action.payload
+        state.isInit = true
+      })
+      .addCase(initializeAuth.rejected, (state) => {
+        state.isAuth = false
+        state.isInit = true
+      })
       .addCase(login.pending, (state) => {
         state.isLoading = true
       })
@@ -50,14 +75,13 @@ export const AuthSlice = createSlice({
           sessionStorage.setItem('refreshToken', action.payload.refresh_token)
         }
         setCookie('accessToken', action.payload.access_token, {
-          Secure: true,
           SameSite: 'Strict',
-          'max-age': 900,
+          'max-age': action.payload.expires_in,
         })
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false
-        state.errorText = action.error.message || 'Неверный логин или пароль'
+        state.errorText = action.error.message || 'Не удалось войти'
       })
       .addCase(logout.pending, (state) => {
         state.isLoading = true
@@ -76,10 +100,8 @@ export const AuthSlice = createSlice({
   },
 })
 
-export const selectIsAuth = (state: { auth: TAuthState }) => state.auth.isAuth
-export const selectGetError = (state: { auth: TAuthState }) => state.auth.errorText
-export const selectIsLoading = (state: { auth: TAuthState }) => state.auth.isLoading
-export const selectIsInit = (state: { auth: TAuthState }) => state.auth.isInit
-export const selectRememberMe = (state: { auth: TAuthState }) => state.auth.rememberMe
-
-export const { initializeAuth } = AuthSlice.actions
+export const selectIsAuth = (state: { auth: AuthInitState }) => state.auth.isAuth
+export const selectGetError = (state: { auth: AuthInitState }) => state.auth.errorText
+export const selectIsLoading = (state: { auth: AuthInitState }) => state.auth.isLoading
+export const selectIsInit = (state: { auth: AuthInitState }) => state.auth.isInit
+export const selectRememberMe = (state: { auth: AuthInitState }) => state.auth.rememberMe

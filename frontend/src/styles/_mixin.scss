@@ -2,6 +2,29 @@
 @use 'vars' as *;
 @use 'sass:math';
 
+@mixin wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-top: 40px;
+}
+
+@mixin h2 {
+  font-size: 26px;
+  font-weight: 500;
+  margin-left: 10px;
+}
+
+@mixin h3 {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+@mixin divider {
+  height: 1.6px;
+  background-color: $grayLight;
+  opacity: 0.45;
+}
+
 @mixin loader($borderWidth, $size, $color) {
   &:after {
     content: '';

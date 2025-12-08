@@ -1,0 +1,111 @@
+@use '../../styles/mixin' as *;
+@use '../../styles/vars' as *;
+@use 'include-media' as *;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-top: 40px;
+
+  .title {
+    @include h2;
+  }
+
+  .container {
+    max-width: 90%;
+    margin: 30px auto 0;
+
+    table {
+      width: 100%;
+      border: none;
+      border-collapse: collapse;
+      overflow: auto;
+
+      th {
+        text-align: start;
+        padding: 16px 6px;
+        font-size: 16px;
+        font-weight: 500;
+        background-color: rgb(235, 241, 247);
+
+        &:nth-child(1) {
+          width: 10%;
+        }
+
+        &:nth-child(2) {
+          width: 30%;
+        }
+
+        &:nth-child(3) {
+          width: 30%;
+        }
+
+        &:nth-child(4) {
+          width: 15%;
+        }
+
+        &:nth-child(5) {
+          width: 15%;
+        }
+      }
+
+      thead tr {
+        background-color: rgb(220, 220, 220);
+      }
+
+      tbody tr {
+        &:nth-child(2n) {
+          background-color: rgb(240, 240, 240);
+        }
+      }
+
+      td {
+        padding: 10px 6px;
+        font-size: 14px;
+        vertical-align: middle;
+      }
+
+      .button {
+        border: none;
+        border-radius: 6px;
+        background-color: $blue;
+        color: white;
+        padding: 6px;
+        font-size: 16px;
+        font-family: inherit;
+        min-width: 50px;
+        cursor: pointer;
+
+        &:hover {
+          background-color: $blueHover;
+        }
+
+        &:active {
+          background-color: $blueActive;
+        }
+
+        &:nth-of-type(2) {
+          margin-left: 10px;
+          background-color: #e2e8f0;
+          color: black;
+
+          &:hover {
+            background-color: #d0d6dd;
+          }
+
+          &:active {
+            background-color: #bcc1c7;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 1280px) {
+  .wrapper {
+    .container {
+      max-width: 95%;
+    }
+  }
+}

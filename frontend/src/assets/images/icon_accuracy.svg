@@ -1,0 +1,21 @@
+<svg viewBox="0 0 100 100" width="60" height="60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="45" fill="#EBF4FF" filter="url(#shadow)"/>
+  
+  <!-- Target circles -->
+  <circle cx="50" cy="50" r="28" fill="none" stroke="#3D88F1" stroke-width="3"/>
+  <circle cx="50" cy="50" r="18" fill="none" stroke="#3D88F1" stroke-width="3"/>
+  <circle cx="50" cy="50" r="6" fill="#3D88F1"/>
+  
+  <!-- Crosshair lines -->
+  <line x1="50" y1="20" x2="50" y2="35" stroke="#3D88F1" stroke-width="3" stroke-linecap="round"/>
+  <line x1="50" y1="65" x2="50" y2="80" stroke="#3D88F1" stroke-width="3" stroke-linecap="round"/>
+  <line x1="20" y1="50" x2="35" y2="50" stroke="#3D88F1" stroke-width="3" stroke-linecap="round"/>
+  <line x1="65" y1="50" x2="80" y2="50" stroke="#3D88F1" stroke-width="3" stroke-linecap="round"/>
+</svg>

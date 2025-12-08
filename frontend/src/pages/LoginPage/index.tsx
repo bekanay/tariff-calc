@@ -26,7 +26,7 @@ export const LoginPage = () => {
 
   const onSubmit = (e: SyntheticEvent) => {
     e.preventDefault()
-     if (rememberMe) {
+    if (rememberMe) {
       localStorage.setItem('login', username)
     } else {
       localStorage.removeItem('login')
@@ -35,9 +35,9 @@ export const LoginPage = () => {
   }
 
   return (
-    <div className={css.container}>
-      <div className={css.header}>
-        <img src={checkmark} alt='' />
+    <div className={css.wrapper}>
+      <div className={css.top}>
+        <img src={checkmark} alt="" />
         <h2 className={css.title}>Вход в систему</h2>
         <p className={css.text}>Введите свои учетные данные</p>
       </div>
@@ -84,11 +84,11 @@ export const LoginPage = () => {
             onChange={(e) => setRememberMe(e.target.checked)}
             disabled={isLoading}
           />
-          <label htmlFor="rememberMe">
-            Запомнить меня
-          </label>
+          <label htmlFor="rememberMe">Запомнить меня</label>
         </div>
-        <Button loading={isLoading} width='100%'>Войти</Button>
+        <Button loading={isLoading} width="100%">
+          Войти
+        </Button>
         {error && <div className={css.error}>{error}</div>}
       </form>
     </div>

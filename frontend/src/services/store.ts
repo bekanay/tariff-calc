@@ -1,10 +1,12 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
 import type { TypedUseSelectorHook } from 'react-redux'
 import { useDispatch as dispatchHook, useSelector as selectorHook } from 'react-redux'
-import { AuthSlice } from './slices/authSlice'
+import { authSlice } from './slices/authSlice'
+import { stationsSlice } from './slices/stationsSlice'
 
 const rootReducer = combineReducers({
-  auth: AuthSlice.reducer,
+  auth: authSlice.reducer,
+  stations: stationsSlice.reducer,
 })
 
 const store = configureStore({

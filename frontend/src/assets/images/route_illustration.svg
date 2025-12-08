@@ -1,0 +1,101 @@
+<svg viewBox="20 60 500 380" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cardShadow">
+      <feDropShadow dx="0" dy="8" stdDeviation="20" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="trainGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3D88F1" />
+      <stop offset="100%" stop-color="#2563eb" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Card background -->
+
+  
+  <!-- Map grid background -->
+  <g opacity="0.15">
+    <line x1="0" y1="60" x2="570" y2="60" stroke="#e2e8f0" stroke-width="1"/>
+    <line x1="0" y1="120" x2="570" y2="120" stroke="#e2e8f0" stroke-width="1"/>
+    <line x1="0" y1="180" x2="570" y2="180" stroke="#e2e8f0" stroke-width="1"/>
+    <line x1="0" y1="240" x2="570" y2="240" stroke="#e2e8f0" stroke-width="1"/>
+    <line x1="0" y1="300" x2="570" y2="300" stroke="#e2e8f0" stroke-width="1"/>
+    
+    <line x1="100" y1="0" x2="100" y2="380" stroke="#e2e8f0" stroke-width="1"/>
+    <line x1="200" y1="0" x2="200" y2="380" stroke="#e2e8f0" stroke-width="1"/>
+    <line x1="300" y1="0" x2="300" y2="380" stroke="#e2e8f0" stroke-width="1"/>
+    <line x1="400" y1="0" x2="400" y2="380" stroke="#e2e8f0" stroke-width="1"/>
+  </g>
+  
+  <!-- Railway tracks -->
+  <g opacity="0.4">
+    <line x1="70" y1="290" x2="320" y2="200" stroke="#3D88F1" stroke-width="5"/>
+    <line x1="70" y1="300" x2="320" y2="210" stroke="#3D88F1" stroke-width="5"/>
+    
+    <!-- Sleepers -->
+    <line x1="100" y1="280" x2="110" y2="305" stroke="#3D88F1" stroke-width="3"/>
+    <line x1="140" y1="268" x2="150" y2="293" stroke="#3D88F1" stroke-width="3"/>
+    <line x1="180" y1="256" x2="190" y2="281" stroke="#3D88F1" stroke-width="3"/>
+    <line x1="220" y1="244" x2="230" y2="269" stroke="#3D88F1" stroke-width="3"/>
+    <line x1="260" y1="232" x2="270" y2="257" stroke="#3D88F1" stroke-width="3"/>
+    <line x1="290" y1="220" x2="300" y2="245" stroke="#3D88F1" stroke-width="3"/>
+  </g>
+  
+  <!-- Train -->
+  <g transform="translate(200, 150)">
+    <rect x="0" y="0" width="90" height="50" rx="6" fill="url(#trainGradient)" filter="url(#cardShadow)"/>
+    <!-- Windows -->
+    <rect x="8" y="8" width="24" height="22" rx="3" fill="white" opacity="0.9"/>
+    <rect x="35" y="8" width="24" height="22" rx="3" fill="white" opacity="0.9"/>
+    <rect x="62" y="8" width="24" height="22" rx="3" fill="white" opacity="0.9"/>
+    <!-- Wheels -->
+    <circle cx="18" cy="54" r="7" fill="#1e40af"/>
+    <circle cx="18" cy="54" r="4" fill="#3b82f6"/>
+    <circle cx="45" cy="54" r="7" fill="#1e40af"/>
+    <circle cx="45" cy="54" r="4" fill="#3b82f6"/>
+    <circle cx="72" cy="54" r="7" fill="#1e40af"/>
+    <circle cx="72" cy="54" r="4" fill="#3b82f6"/>
+  </g>
+  
+  <!-- Start point (Station A) -->
+  <circle cx="70" cy="320" r="20" fill="#3D88F1"/>
+  <circle cx="70" cy="320" r="14" fill="white"/>
+  <circle cx="70" cy="320" r="8" fill="#3D88F1"/>
+  
+  <!-- Station A label -->
+  <rect x="55" y="340" width="30" height="26" rx="13" fill="#3D88F1"/>
+  <text x="70" y="358" font-family="Arial, sans-serif" font-size="14" fill="white" text-anchor="middle" font-weight="600">
+    А
+  </text>
+  
+  <!-- End point (Station B) -->
+  <circle cx="480" cy="120" r="20" fill="#10b981"/>
+  <circle cx="480" cy="120" r="14" fill="white"/>
+  <circle cx="480" cy="120" r="8" fill="#10b981"/>
+  
+  <!-- Station B label -->
+  <rect x="465" y="85" width="30" height="26" rx="13" fill="#10b981"/>
+  <text x="480" y="103" font-family="Arial, sans-serif" font-size="14" fill="white" text-anchor="middle" font-weight="600">
+    Б
+  </text>
+  
+  <!-- Route path -->
+  <path d="M 70 320 Q 200 280 330 220 T 480 120" 
+        stroke="#3D88F1" 
+        stroke-width="4" 
+        fill="none" 
+        stroke-linecap="round" 
+        stroke-dasharray="10 8"
+        opacity="1"/>
+  
+  <!-- Route markers -->
+  <circle cx="200" cy="260" r="6" fill="#3D88F1" opacity="0.5"/>
+  <circle cx="330" cy="200" r="6" fill="#3D88F1" opacity="0.5"/>
+  
+  <!-- Distance/Price info box -->
+
+  
+  <!-- Decorative elements -->
+  <circle cx="450" cy="280" r="8" fill="#3D88F1" opacity="0.1"/>
+  <circle cx="120" cy="100" r="10" fill="#10b981" opacity="0.1"/>
+  <circle cx="500" cy="340" r="12" fill="#3D88F1" opacity="0.08"/>
+</svg>

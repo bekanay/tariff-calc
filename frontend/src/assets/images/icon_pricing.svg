@@ -1,0 +1,24 @@
+<svg viewBox="0 0 100 100" width="60" height="60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="45" fill="#F0FDF4" filter="url(#shadow)"/>
+  
+  <!-- Wallet -->
+  <rect x="30" y="42" width="40" height="26" rx="4" fill="#3D88F1"/>
+  <rect x="30" y="36" width="40" height="11" rx="4" fill="#3D88F1"/>
+  
+  <!-- Card slot -->
+  <rect x="37" y="48" width="26" height="4" rx="2" fill="white" opacity="0.7"/>
+  
+  <!-- Coin -->
+  <circle cx="60" cy="58" r="10" fill="#FCD34D"/>
+  <circle cx="60" cy="58" r="7" fill="#F59E0B"/>
+  
+  <!-- Ruble symbol -->
+  <text x="60" y="62" font-family="Arial, sans-serif" font-size="12" fill="white" text-anchor="middle" font-weight="bold">₸</text>
+</svg>

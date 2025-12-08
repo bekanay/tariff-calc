@@ -1,0 +1,91 @@
+@use '../../styles/mixin' as *;
+@use '../../styles/vars' as *;
+@use 'include-media' as *;
+
+.wrapper {
+  position: relative;
+  width: 100%;
+
+  .label {
+    font-size: 14px;
+    font-weight: 500;
+    // color: $gray;
+    margin-bottom: 4px;
+  }
+
+  .placeholder {
+    color: $grayLight;
+  }
+
+  .input {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 10px 0 15px;
+    border-radius: 4px;
+    border: 1px solid $grayLight;
+    font-size: 16px;
+    outline: none;
+    width: 100%;
+    font-family: inherit;
+
+    &.errors {
+      border-color: red;
+    }
+
+    &::placeholder {
+      color: $grayLight;
+    }
+
+    &:hover {
+      border-color: $blueHover;
+    }
+
+    &:focus {
+      border-color: $blue;
+    }
+
+    &:active {
+      border-color: $blueActive;
+    }
+
+    &::before {
+      content: url('../../assets/images/search_icon.svg');
+      position: absolute;
+      right: 5px;
+      top: 55%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      width: 24px;
+    }
+  }
+
+  .error {
+    color: red;
+    font-size: 14px;
+    margin: 5px 0 0 5px;
+  }
+
+  .dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #fff;
+    border: 1px solid $grayLight;
+    margin-top: 4px;
+    z-index: 100;
+    border-radius: 6px;
+
+    .item {
+      padding: 10px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .item:hover {
+      background: $blue;
+    }
+  }
+}

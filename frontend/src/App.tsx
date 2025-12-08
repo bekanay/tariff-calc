@@ -9,6 +9,9 @@ import { initializeAuth } from './services/slices/authSlice'
 import { LoginPage } from './pages/LoginPage'
 import { LogoutPage } from './pages/LogoutPage'
 import { useAutoRefreshToken } from './utils/hooks/useAutoRefreshToken'
+import { CalculatorPage } from './pages/CalculatorPage'
+import { HistoryPage } from './pages/HistoryPage'
+import { StationsPage } from './pages/StationsPage'
 
 function App() {
   const dispatch = useDispatch()
@@ -36,6 +39,30 @@ function App() {
             element={
               <ProtectedRoute>
                 <MainPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                <HistoryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reference/stations"
+            element={
+              <ProtectedRoute>
+                <StationsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/calculator"
+            element={
+              <ProtectedRoute>
+                <CalculatorPage />
               </ProtectedRoute>
             }
           />

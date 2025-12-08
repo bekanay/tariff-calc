@@ -2,31 +2,35 @@
 @use '../../styles/vars' as *;
 @use 'include-media' as *;
 
-.container {
+.wrapper {
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-direction: column;
-  margin-top: 60px;
+  max-width: 410px;
+  margin-top: 90px;
+  margin-bottom: 60px;
+  margin-inline: auto;
   padding: 40px;
-  box-shadow: 0 0 10px rgba(60, 60, 60, 0.5);
-  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(105, 105, 105, 0.5);
+  border-radius: 6px;
 
-  .header {
+  .top {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     gap: 8px;
 
     img {
-      width: 80px;
-      height: 80px;
+      width: 60px;
+      height: 60px;
     }
 
     .title {
-      font-size: 34px;
+      font-size: clamp(30px, 3vw, 34px);
       font-weight: 500;
-    } 
+    }
 
     .text {
       font-size: 18px;
@@ -63,13 +67,19 @@
         margin-top: 4px;
         padding: 16px;
         font-size: 16px;
-        font-family: 'Roboto';
+        font-family: inherit;
         outline: none;
-        border: 1.5px solid rgb(rgb(0, 0, 0), 0.4);
+        border: 1px solid $grayLight;
         border-radius: 4px;
+        transition: 0.2s;
 
         &:focus {
-          border: 1px solid black;
+          border: 1px solid $blue;
+        }
+
+        &:hover {
+          border: 1px solid $blue;
+          transition: 0.2s;
         }
 
         &.invalid {
@@ -101,11 +111,46 @@
     }
 
     .checkboxWrapper {
-      margin-top: -10px;
+      margin-bottom: 20px;
+
+      input[type='checkbox'] {
+        &:hover {
+          cursor: pointer;
+        }
+      }
+
+      label {
+        font-size: 18px;
+        font-weight: 400;
+      }
     }
 
     .error {
       color: red;
     }
+  }
+}
+
+@media (max-width: 1024px) {
+  .wrapper {
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .wrapper {
+    .top {
+      img {
+        width: 70px;
+        height: 70pxwrapper;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .wrapper {
+    margin-top: 0;
+    padding: 20px;
   }
 }

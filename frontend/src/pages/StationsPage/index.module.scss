@@ -1,0 +1,258 @@
+@use '../../styles/mixin' as *;
+@use '../../styles/vars' as *;
+@use 'include-media' as *;
+
+.wrapper {
+  @include wrapper;
+
+  .title {
+    @include h2;
+  }
+
+  .container {
+    max-width: 90%;
+    width: 100%;
+    margin: 30px auto;
+    overflow: auto;
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      gap: 20px;
+
+      .inputWrapper {
+        position: relative;
+
+        max-width: 800px;
+        min-width: 330px;
+        width: 100%;
+
+        .input {
+          width: 100%;
+          align-items: center;
+          height: 40px;
+          padding: 0 10px 0 15px;
+          border-radius: 4px;
+          border: 1px solid $grayLight;
+          font-size: 16px;
+          outline: none;
+          font-family: inherit;
+
+          &::placeholder {
+            color: $grayLight;
+          }
+
+          &:hover {
+            border-color: $blueHover;
+          }
+
+          &:focus {
+            border-color: $blue;
+          }
+
+          &:active {
+            border-color: $blueActive;
+          }
+        }
+
+        img {
+          width: 14px;
+          height: 14px;
+          position: absolute;
+          right: 13px;
+          top: 13px;
+          cursor: pointer;
+          opacity: 0.3;
+
+          &:hover {
+            opacity: 1;
+          }
+        }
+      }
+
+      .addIcon {
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    table {
+      width: 100%;
+      border: none;
+      border-collapse: collapse;
+      overflow: auto;
+
+      th {
+        text-align: start;
+        padding: 16px 6px;
+        font-size: 16px;
+        font-weight: 500;
+
+        &:nth-child(1) {
+          width: 5%;
+        }
+
+        &:nth-child(2) {
+          width: 10%;
+        }
+
+        &:nth-child(3) {
+          width: 20%;
+        }
+
+        &:nth-child(4) {
+          width: 15%;
+        }
+
+        &:nth-child(5) {
+          width: 15%;
+        }
+
+        &:nth-child(6) {
+          width: 15%;
+        }
+      }
+
+      thead tr {
+        &:focus {
+          transition: 0.5s;
+        }
+
+        th {
+          background-color: rgb(235, 241, 247);
+        }
+
+        .toggle {
+          cursor: pointer;
+
+          &:hover {
+            background-color: rgb(202, 226, 247);
+            transition: 0.3s;
+          }
+        }
+      }
+
+      tbody tr {
+        &:nth-child(2n) {
+          background-color: rgb(240, 240, 240);
+        }
+      }
+
+      td {
+        padding: 10px 6px;
+        font-size: 14px;
+        vertical-align: middle;
+
+        &:nth-of-type(2) {
+          font-weight: 500;
+        }
+
+        .actions {
+          display: flex;
+          gap: 20px;
+        }
+
+        .button {
+          display: inline-block;
+          padding: 8px;
+          background-color: $blue;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: 0.1s;
+          position: relative;
+          color: white;
+          font-family: inherit;
+          font-size: 16px;
+
+          &:hover {
+            background-color: $blueHover;
+            transition: 0.1s;
+          }
+
+          &:active {
+            background-color: $blueActive;
+          }
+
+          &.disabled {
+            background-color: gray;
+            color: rgb(66, 65, 65);
+            cursor: default;
+            user-select: none;
+          }
+
+          img {
+            width: 18px;
+            height: 18px;
+            color: white;
+          }
+        }
+
+        .remove {
+          background-color: rgb(243, 48, 48);
+
+          &:hover {
+            background-color: rgb(224, 18, 18);
+            transition: 0.1s;
+          }
+
+          &:active {
+            background-color: rgb(201, 23, 23);
+          }
+        }
+      }
+    }
+  }
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 30px;
+
+  .button {
+    display: inline-block;
+    padding: 8px;
+    background-color: $blue;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.1s;
+    position: relative;
+    color: white;
+    font-family: inherit;
+    font-size: 16px;
+    width: 80px;
+
+    &:hover {
+      background-color: $blueHover;
+      transition: 0.1s;
+    }
+
+    &:active {
+      background-color: $blueActive;
+    }
+
+    &.yes {
+      background-color: rgb(243, 48, 48);
+
+      &:hover {
+        background-color: rgb(224, 18, 18);
+        transition: 0.1s;
+      }
+
+      &:active {
+        background-color: rgb(201, 23, 23);
+      }
+    }
+  }
+}
+
+@media (max-width: 1280px) {
+  .wrapper {
+    .container {
+      max-width: 95%;
+    }
+  }
+}

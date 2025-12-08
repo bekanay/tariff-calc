@@ -1,0 +1,22 @@
+@use '../../styles/mixin' as *;
+@use '../../styles/vars' as *;
+@use 'include-media' as *;
+
+.checkboxWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+
+  input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: $blue;
+  }
+
+  .label {
+    font-size: 16px;
+    cursor: pointer;
+  }
+}

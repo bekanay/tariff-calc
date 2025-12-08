@@ -14,9 +14,7 @@ export const ProtectedRoute = ({ children, unAuthOnly }: ProtectedRouteProps) =>
   const location = useLocation()
 
   if (!isInit) {
-    return (
-      <Loader type='page'/>
-    )
+    return <Loader type="page" />
   }
 
   if (!unAuthOnly && !isAuth) {
@@ -36,22 +34,3 @@ export const ProtectedRoute = ({ children, unAuthOnly }: ProtectedRouteProps) =>
 
   return children
 }
-
-// export const ProtectedRoute = ({
-//   children,
-//   unAuthOnly
-// }: ProtectedRouteProps) => {
-//   const isAuth = useSelector(selectisAuth);
-//   const location = useLocation();
-
-//   if (!unAuthOnly && !isAuth) {
-//     return <Navigate replace to='/login' state={{ from: location }} />;
-//   }
-
-//   if (unAuthOnly && isAuth) {
-//     const from = location.state?.from || { pathname: '/' };
-//     return <Navigate replace to={from} />;
-//   }
-
-//   return children;
-// };

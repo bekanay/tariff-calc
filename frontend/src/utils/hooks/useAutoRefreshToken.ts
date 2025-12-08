@@ -1,15 +1,12 @@
 import { useEffect } from 'react'
-import { useDispatch, useSelector } from '../../services/store'
+import { useDispatch } from '../../services/store'
 import { refreshToken } from '../../services/api/authApi'
-import { logout, selectIsAuth } from '../../services/slices/authSlice'
+import { logout } from '../../services/slices/authSlice'
 
-export const useAutoRefreshToken = (intervalMs = 14 * 60 * 1000) => {
-  const isAuth = useSelector(selectIsAuth)
+export const useAutoRefreshToken = (intervalMs = 4 * 60 * 1000) => {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    if (!isAuth) return
-
     const refresh = async () => {
       try {
         await refreshToken()
@@ -19,10 +16,12 @@ export const useAutoRefreshToken = (intervalMs = 14 * 60 * 1000) => {
       }
     }
 
+    window.addEventListener('focus', refresh)
     const interval = setInterval(refresh, intervalMs)
 
     return () => {
+      window.removeEventListener('focus', refresh)
       clearInterval(interval)
     }
-  }, [dispatch, intervalMs, isAuth])
+  }, [dispatch, intervalMs])
 }

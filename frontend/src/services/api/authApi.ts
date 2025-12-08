@@ -1,5 +1,5 @@
 import { setCookie } from '../../utils/cookie'
-import type { TUserData } from '../../utils/types'
+import type { TLoginData } from '../../utils/types'
 
 const URL = import.meta.env.VITE_URL
 
@@ -13,21 +13,25 @@ type TServerResponse<T> = {
 type TRefreshResponse = TServerResponse<{
   refresh_token: string
   access_token: string
+  expires_in: number
 }>
 
 type TAuthResponse = TServerResponse<{
   refresh_token: string
   access_token: string
+  expires_in: number
 }>
 
-export const refreshToken = (): Promise<TRefreshResponse> => {
+export const refreshToken = async (): Promise<TRefreshResponse> => {
   const storage = localStorage.getItem('refreshToken') ? localStorage : sessionStorage
 
   const token = storage.getItem('refreshToken')
 
-  if (!token) return Promise.reject('No refresh token found')
+  if (!token) {
+    throw new Error('No refresh token found')
+  }
 
-  return fetch(`${URL}/refresh-token`, {
+  const res = await fetch(`${URL}/refresh-token`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
@@ -36,19 +40,20 @@ export const refreshToken = (): Promise<TRefreshResponse> => {
       refresh_token: token,
     }),
   })
-    .then((res) => checkResponse<TRefreshResponse>(res))
-    .then((refreshData) => {
-      if (!refreshData?.access_token || !refreshData?.refresh_token) {
-        return Promise.reject(refreshData)
-      }
-      storage.setItem('refreshToken', refreshData.refresh_token)
-      setCookie('accessToken', refreshData.access_token, {
-        Secure: true,
-        SameSite: 'Strict',
-        'max-age': 900,
-      })
-      return refreshData
-    })
+
+  const refreshData = await checkResponse<TRefreshResponse>(res)
+
+  if (!refreshData?.access_token || !refreshData?.refresh_token) {
+    throw new Error('Invalid refresh response')
+  }
+
+  storage.setItem('refreshToken', refreshData.refresh_token)
+  setCookie('accessToken', refreshData.access_token, {
+    SameSite: 'Strict',
+    'max-age': refreshData.expires_in,
+  })
+
+  return refreshData
 }
 
 export const fetchWithRefresh = async <T>(url: RequestInfo, options: RequestInit) => {
@@ -59,7 +64,7 @@ export const fetchWithRefresh = async <T>(url: RequestInfo, options: RequestInit
     if ((err as { message: string }).message === 'jwt expired') {
       const refreshData = await refreshToken()
       if (options.headers) {
-        (options.headers as { [key: string]: string }).authorization = refreshData.access_token
+        ;(options.headers as { [key: string]: string }).authorization = refreshData.access_token
       }
       const res = await fetch(url, options)
       return await checkResponse<T>(res)
@@ -69,7 +74,7 @@ export const fetchWithRefresh = async <T>(url: RequestInfo, options: RequestInit
   }
 }
 
-export const loginApi = (data: TUserData) =>
+export const loginApi = (data: TLoginData) =>
   fetch(`${URL}/login`, {
     method: 'POST',
     headers: {
