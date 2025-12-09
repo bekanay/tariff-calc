@@ -79,6 +79,7 @@ export const StationsPage = () => {
         current_page: currentPage,
         name: searchValue,
         sort,
+        paragraph: searchValue
       })
     )
   }, [dispatch, currentPage, searchValue, sort])
@@ -100,7 +101,7 @@ export const StationsPage = () => {
     dispatch(clearStation())
   }
 
-  const toggleSort = (field: 'id' | 'stan_kod' | 'stan_name') => {
+  const toggleSort = (field: 'id' | 'stan_kod' | 'stan_name' | 'paragraph') => {
     setSort((prev) => {
       if (prev === field) {
         updateURL({ sort: `-${field}` })
@@ -123,7 +124,7 @@ export const StationsPage = () => {
               className={css.input}
               value={value}
               onChange={(e) => onChange(e)}
-              placeholder="Поиск по коду или названию станции..."
+              placeholder="Поиск по коду, названию или параграфу станции..."
             />
             {value && <img src={clear} onClick={onClick} />}
           </div>
@@ -142,7 +143,9 @@ export const StationsPage = () => {
                 Название {sort === 'stan_name' ? '▲' : sort === '-stan_name' ? '▼' : ''}
               </th>
               <th>Признак</th>
-              <th>Параграф</th>
+              <th className={css.toggle} onClick={() => toggleSort('paragraph')}>
+                Параграф {sort === 'paragraph' ? '▲' : sort === '-paragraph' ? '▼' : ''}
+              </th>
               <th>Дейсвия</th>
             </tr>
           </thead>

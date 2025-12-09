@@ -112,5 +112,6 @@ export const selectStations = (state: { stations: StationsInitState }) => state.
 export const selectMetaData = (state: { stations: StationsInitState }) => state.stations.metaData
 export const selectStation = (state: { stations: StationsInitState }) => state.stations.station
 export const selectIsLoading = (state: { stations: StationsInitState }) => state.stations.isLoading
+export const selectErrorText = (state: { stations: StationsInitState }) => state.stations.errorText
 
 export const { clearStation } = stationsSlice.actions

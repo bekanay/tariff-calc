@@ -9,9 +9,10 @@ import { initializeAuth } from './services/slices/authSlice'
 import { LoginPage } from './pages/LoginPage'
 import { LogoutPage } from './pages/LogoutPage'
 import { useAutoRefreshToken } from './utils/hooks/useAutoRefreshToken'
-import { CalculatorPage } from './pages/CalculatorPage'
+import { TariffCalculationPage } from './pages/TariffCalculationPage'
 import { HistoryPage } from './pages/HistoryPage'
 import { StationsPage } from './pages/StationsPage'
+import { DistanceCalculationPage } from './pages/DistanceCalculationPage'
 
 function App() {
   const dispatch = useDispatch()
@@ -59,10 +60,18 @@ function App() {
             }
           />
           <Route
-            path="/calculator"
+            path="/tariff-calculation-rk"
             element={
               <ProtectedRoute>
-                <CalculatorPage />
+                <TariffCalculationPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/distance-calculation"
+            element={
+              <ProtectedRoute>
+                <DistanceCalculationPage />
               </ProtectedRoute>
             }
           />

@@ -50,6 +50,16 @@ export const Layout = () => {
                     </Link>
                   </li>
                   <li className={css.item} onClick={() => setOpen(false)}>
+                    <Link className={css.link} to="/tariff-calculation-rk">
+                      Расчет тарифа по РК
+                    </Link>
+                  </li>
+                  <li className={css.item} onClick={() => setOpen(false)}>
+                    <Link className={css.link} to="/distance-calculation">
+                      Расчет кратчайшего расстояния
+                    </Link>
+                  </li>
+                  <li className={css.item} onClick={() => setOpen(false)}>
                     <Link className={css.link} to="/history">
                       История расчетов
                     </Link>
@@ -57,11 +67,6 @@ export const Layout = () => {
                   <li className={css.item} onClick={() => setOpen(false)}>
                     <Link className={css.link} to="/reference/stations">
                       Справочник
-                    </Link>
-                  </li>
-                  <li className={css.item} onClick={() => setOpen(false)}>
-                    <Link className={css.link} to="/calculator">
-                      Расчет кратчайшего расстояния
                     </Link>
                   </li>
                   <li className={css.item} onClick={() => setOpen(false)}>

@@ -18,13 +18,14 @@ export type TStationResponse = TServerResponse<{
   station: TStation
 }>
 
-export type Sort = 'id' | '-id' | 'stan_kod' | '-stan_kod' | 'stan_name' | '-stan_name'
+export type Sort = 'id' | '-id' | 'stan_kod' | '-stan_kod' | 'stan_name' | '-stan_name' | 'paragraph' | '-paragraph'
 
 export type TStationsQuery = {
   current_page?: number
   page_size?: number
   sort?: Sort
   name?: string
+  paragraph?: string
 }
 
 export const getStationsApi = (params: TStationsQuery = {}) => {
@@ -33,6 +34,7 @@ export const getStationsApi = (params: TStationsQuery = {}) => {
   if (params.page_size) searchParams.append('page_size', params.page_size.toString())
   if (params.sort) searchParams.append('sort', params.sort)
   if (params.name) searchParams.append('name', params.name)
+  if (params.paragraph) searchParams.append('paragraph', params.paragraph)
 
   const queryString = searchParams.toString()
   const url = `${URL}/stations${queryString ? `?${queryString}` : ''}`

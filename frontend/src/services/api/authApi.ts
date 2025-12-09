@@ -3,8 +3,15 @@ import type { TLoginData } from '../../utils/types'
 
 const URL = import.meta.env.VITE_URL
 
-const checkResponse = <T>(res: Response): Promise<T> =>
-  res.ok ? res.json() : res.json().then((err) => Promise.reject(err))
+const checkResponse = async <T>(res: Response): Promise<T> => {
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    return Promise.reject({ status: res.status, ...data });
+  }
+
+  return data;
+};
 
 type TServerResponse<T> = {
   success: boolean
@@ -60,8 +67,8 @@ export const fetchWithRefresh = async <T>(url: RequestInfo, options: RequestInit
   try {
     const res = await fetch(url, options)
     return await checkResponse<T>(res)
-  } catch (err) {
-    if ((err as { message: string }).message === 'jwt expired') {
+  } catch (err: any) {
+    if (err.status === 401) {
       const refreshData = await refreshToken()
       if (options.headers) {
         ;(options.headers as { [key: string]: string }).authorization = refreshData.access_token

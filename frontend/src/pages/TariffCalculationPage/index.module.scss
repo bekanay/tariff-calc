@@ -1,0 +1,36 @@
+@use '../../styles/mixin' as *;
+@use '../../styles/vars' as *;
+@use 'include-media' as *;
+
+.wrapper {
+  @include wrapper;
+
+  .title {
+    @include h2;
+  }
+
+  .subtitle {
+    margin-top: 6px;
+    margin-left: 10px;
+    font-size: 14px;
+    color: $gray;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    padding: 15px 30px;
+    box-shadow:
+      -10px 0 10px -10px rgba(112, 112, 112, 0.3),
+      10px 0 10px -10px rgba(112, 112, 112, 0.3);
+  }
+}
+
+@media (max-width: 768px) {
+  .wrapper {
+    .card {
+      padding: 0;
+      box-shadow: none;
+    }
+  }
+}

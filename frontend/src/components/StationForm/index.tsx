@@ -1,6 +1,8 @@
 import { Field, Form, Formik } from 'formik'
 import * as Yup from 'yup'
 import css from './index.module.scss'
+import { useSelector } from '../../services/store'
+import { selectErrorText } from '../../services/slices/stationsSlice'
 
 export type TStationForm = {
   stan_kod: string
@@ -32,6 +34,8 @@ export const StationForm = ({
   onSubmit,
   submitText = 'Сохранить',
 }: StationFormProps) => {
+  const errorText = useSelector(selectErrorText)
+
   return (
     <Formik initialValues={initialValues} validationSchema={StationSchema} enableReinitialize onSubmit={onSubmit}>
       {({ errors, touched }) => (
@@ -74,6 +78,8 @@ export const StationForm = ({
             <Field className={css.input} id="paragraph" name="paragraph" placeholder="Введите" />
             {errors.paragraph && touched.paragraph && <div className={css.error}>{errors.paragraph}</div>}
           </div>
+
+          {errorText && <div className={css.error}>{errorText}</div>}
 
           <button className={css.button} type="submit">
             {submitText}
